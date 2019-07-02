@@ -9,6 +9,6 @@
         <module name="MhyUtils" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="8" />
+    <bytecodeTargetLevel target="7" />
   </component>
 </project>

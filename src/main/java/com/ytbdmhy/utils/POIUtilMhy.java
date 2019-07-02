@@ -69,7 +69,7 @@ public class POIUtilMhy {
                             Cell cell = row.getCell(cellNum);
 //                            if (cell == null)
 //                                continue;
-                            rowValue[cellNum] = cell.getStringCellValue();
+                            rowValue[cellNum] = cell == null ? "" : cell.getStringCellValue();
                         }
                         result.add(rowValue);
                     }
