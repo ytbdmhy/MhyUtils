@@ -25,7 +25,7 @@ public class IncreaseImageSizeUtil {
 //                    .append(imagePath);
             System.out.println(String.valueOf(cmdTxt));
             try {
-                    Runtime.getRuntime().exec(String.valueOf(cmdTxt));
+                Runtime.getRuntime().exec(String.valueOf(cmdTxt));
             } catch (IOException e) {
                 e.printStackTrace();
             }
