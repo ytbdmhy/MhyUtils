@@ -56,8 +56,8 @@ public class POIUtilMhy {
         Workbook workbook = getWorkbook(file);
         if (workbook != null) {
             for (int sheetNum = 0; sheetNum < workbook.getNumberOfSheets(); sheetNum++) {
+                Sheet sheet = workbook.getSheetAt(sheetNum);
                 if (file.getName().toLowerCase().endsWith(".xls")) {
-                    Sheet sheet = workbook.getSheetAt(sheetNum);
 //                    if (sheet == null)
 //                        continue;
                     for (int rowNum = sheet.getFirstRowNum(); rowNum < sheet.getLastRowNum(); rowNum++) {
@@ -82,7 +82,6 @@ public class POIUtilMhy {
                         result.add(rowValue);
                     }
                 } else {
-                    Sheet sheet = workbook.getSheetAt(sheetNum);
                     for (Row row : sheet) {
                         String[] rowValue = new String[row.getPhysicalNumberOfCells()];
                         int i = 0;
