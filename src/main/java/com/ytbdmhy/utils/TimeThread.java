@@ -26,6 +26,6 @@ public class TimeThread extends Thread {
     }
 
     public void tellStop() {
-        this.stopMark = true;
+        stopMark = true;
     }
 }
