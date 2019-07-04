@@ -4,12 +4,17 @@ public class TimeThread extends Thread {
 
     private volatile boolean stopMark = false;
 
+    // 间隔时间
+    private int interval;
+
+    public TimeThread(int interval) {
+        this.interval = interval;
+    }
+
     @Override
     public void run() {
         int i = 0;
-        // 间隔时间
-        int interval = 1;
-        while (!this.stopMark) {
+        while (!stopMark) {
             System.out.println("第" + i + "个" + interval + "秒过去了。。。");
             i++;
             try {
