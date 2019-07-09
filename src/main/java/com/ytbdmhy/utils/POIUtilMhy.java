@@ -7,6 +7,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.util.StringUtils;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,6 +20,9 @@ import java.util.List;
  * @Remarks: poi 3.17; poi-ooxml 3.17; poi-scratchpad 3.17
  */
 public class POIUtilMhy {
+
+    // 导出excel的每sheet的最大行数限制
+    private static final int sheetSize = 800000;
 
     public static String[] readExcelFirstRow(String filePath) {
         return readExcelFirstRow(new File(filePath));
@@ -107,6 +111,7 @@ public class POIUtilMhy {
     }
 
     public static void exportExcel(String exportPath, String[] firstRow, List<Object[]> dataList) {
+        boolean isLinkedList = dataList.getClass() == LinkedList.class;
         if (dataList == null || dataList.size() == 0)
 //            throw new NullPointerException("将要导出excel的数据为空");
             return;
@@ -119,48 +124,67 @@ public class POIUtilMhy {
         } else {
             workbook = new XSSFWorkbook();
         }
-        // 创建工作表
-        Sheet sheet = workbook.createSheet();
-        // 创建单元格格式
-        CellStyle cellStyle = workbook.createCellStyle();
-        // 创建字体
-        Font font = workbook.createFont();
-        // 设置字体大小
-        font.setFontHeightInPoints((short) 11);
-        // 设置字体是否加粗
-        font.setBold(true);
-        // 设置字体名称
-        font.setFontName("Calibri");
-        // 在样式应用设置的字体
-        cellStyle.setFont(font);
-        // 设置字体换行
-        cellStyle.setWrapText(false);
-        int i = 0;
-        if (firstRow.length > 0) {
-            Row row = sheet.createRow(0);
-            // 设置行高
-            row.setHeight((short) (20 * 15));
-            for (String colData : firstRow) {
-                // 创建对应的单元格
-                Cell cell = row.createCell(i);
-                // 设置单元格的数据类型为文本
-                cell.setCellType(CellType.STRING);
-                // 设置单元格的数值
-                cell.setCellValue(StringUtils.isEmpty(colData) ? null : colData);
-                i++;
+
+        for (int index = 0,size = dataList.size() / sheetSize + 1; index < size; index++) {
+            // 创建工作表
+            Sheet sheet = workbook.createSheet();
+            // 创建单元格格式
+            CellStyle cellStyle = workbook.createCellStyle();
+            // 创建字体
+            Font font = workbook.createFont();
+            // 设置字体大小
+            font.setFontHeightInPoints((short) 11);
+            // 设置字体是否加粗
+            font.setBold(true);
+            // 设置字体名称
+            font.setFontName("Calibri");
+            // 在样式应用设置的字体
+            cellStyle.setFont(font);
+            // 设置字体换行
+            cellStyle.setWrapText(false);
+            int i = 0;
+            if (firstRow.length > 0) {
+                Row row = sheet.createRow(0);
+                // 设置行高
+                row.setHeight((short) (20 * 15));
+                for (String colData : firstRow) {
+                    // 创建对应的单元格
+                    Cell cell = row.createCell(i);
+                    // 设置单元格的数据类型为文本
+                    cell.setCellType(CellType.STRING);
+                    // 设置单元格的数值
+                    cell.setCellValue(StringUtils.isEmpty(colData) ? null : colData);
+                    i++;
+                }
+                i = 1;
             }
-            i = 1;
-        }
-        for (Object[] rowData : dataList) {
-            Row row = sheet.createRow(i);
-            int j = 0;
-            for (Object colData : rowData) {
-                Cell cell = row.createCell(j, CellType.STRING);
-                cell.setCellValue(StringUtils.isEmpty(colData) ? null : String.valueOf(colData));
-                j++;
+            if (size == 1) {
+                createSheetData(dataList, sheet);
+            } else {
+                if (isLinkedList) {
+                    LinkedList<Object[]> indexList = new LinkedList<>();
+                    indexList.addAll(dataList.subList(index * sheetSize
+                            , (index * sheetSize + sheetSize - 1) > dataList.size() ? dataList.size() : index * sheetSize + sheetSize));
+                    createSheetData(indexList, sheet);
+                } else {
+                    for (int z = 0, x = (index == size-1 ? dataList.size() + sheetSize - (sheetSize * size) : sheetSize); z < x; z++) {
+                        Row row = sheet.createRow(i);
+                        int j = 0;
+                        for (Object colData : dataList.get(z + (index * sheetSize))) {
+                            Cell cell = row.createCell(j, CellType.STRING);
+                            cell.setCellValue(StringUtils.isEmpty(colData) ? null : String.valueOf(colData));
+                            j++;
+                        }
+                        i++;
+                    }
+                }
             }
-            i++;
         }
+
+        outPutStreamExcel(workbook, exportPath);
+    }
+
+    public static void outPutStreamExcel(Workbook workbook, String exportPath) {
         if (workbook != null) {
             try {
                 FileOutputStream fileOutputStream = new FileOutputStream(exportPath);
@@ -170,6 +194,20 @@ public class POIUtilMhy {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private static void createSheetData(List<Object[]> dataList, Sheet sheet) {
+        int i = 0;
+        for (Object[] rowData : dataList) {
+            Row row = sheet.createRow(i);
+            int j = 0;
+            for (Object colData : rowData) {
+                Cell cell = row.createCell(j, CellType.STRING);
+                cell.setCellValue(StringUtils.isEmpty(colData) ? null : String.valueOf(colData));
+                j++;
+            }
+            i++;
         }
     }
 
@@ -203,6 +241,21 @@ public class POIUtilMhy {
     public static void main(String[] args) throws FileNotFoundException {
         System.out.println("start");
         long startTime = System.currentTimeMillis();
+
+        List<Object[]> data = new LinkedList<>();
+        String[] strings;
+        for (int i = 0; i < 3500000; i++) {
+            strings = new String[4];
+            strings[0] = i + 1 + "-1";
+            strings[1] = i + 1 + "-2";
+            strings[2] = i + 1 + "-3";
+            strings[3] = i + 1 + "-4";
+            data.add(strings);
+        }
+        exportExcel("C:\\Users\\Administrator\\Desktop/MapTest.xlsx", data);
+        // 导出350万条4列小字符串
+        // ArrayList 耗时 33.445秒
+        // LinkedList 耗时 30.928秒
 
         System.out.println("over,用时:" + (System.currentTimeMillis() - startTime) + "毫秒");
     }

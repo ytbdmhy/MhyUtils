@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 合并单元格的POI demo
+ */
 public class POIUtilM {
 
     /**
@@ -175,16 +178,8 @@ public class POIUtilM {
 
         if (filePath.indexOf(".xls") < 0)
             filePath += ".xlsx";
-        if (workbook != null) {
-            try {
-                FileOutputStream fileOutputStream = new FileOutputStream(filePath);
-                workbook.write(fileOutputStream);
-                fileOutputStream.flush();
-                fileOutputStream.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+
+        POIUtilMhy.outPutStreamExcel(workbook, filePath);
     }
 
     private static void setCell(Row row, CellStyle cellStyle, int cellNum, String cellValue) {
