@@ -25,7 +25,7 @@ public class POIUtilMhy {
     private static final int sheetSize = 800000;
 
     public static String[] readExcelFirstRow(String filePath) {
-        return readExcelFirstRow(new File(filePath));
+        return StringUtils.isEmpty(filePath) ? null : readExcelFirstRow(new File(filePath));
     }
 
     public static String[] readExcelFirstRow(File file) {
@@ -52,7 +52,7 @@ public class POIUtilMhy {
     }
 
     public static List readExcel(String filePath) {
-        return readExcel(new File(filePath));
+        return StringUtils.isEmpty(filePath) ? null : readExcel(new File(filePath));
     }
 
     public static List readExcel(File file) {
@@ -62,23 +62,17 @@ public class POIUtilMhy {
             for (int sheetNum = 0; sheetNum < workbook.getNumberOfSheets(); sheetNum++) {
                 Sheet sheet = workbook.getSheetAt(sheetNum);
                 if (file.getName().toLowerCase().endsWith(".xls")) {
-//                    if (sheet == null)
-//                        continue;
                     for (int rowNum = sheet.getFirstRowNum(); rowNum < sheet.getLastRowNum(); rowNum++) {
                         Row row = sheet.getRow(rowNum);
                         String[] rowValue = new String[row.getLastCellNum() - row.getFirstCellNum()];
-//                        if (row == null)
-//                            continue;
                         for (int cellNum = row.getFirstCellNum(); cellNum < row.getLastCellNum(); cellNum++) {
                             Cell cell = row.getCell(cellNum);
-//                            if (cell == null)
-//                                continue;
                             if (cell == null) {
                                 rowValue[cellNum] = "";
                             } else if (cell.getCellType() == 0) {
                                 rowValue[cellNum] = String.valueOf(cell.getNumericCellValue());
-                            } else if (cell.getCellType() == 1) {
-                                rowValue[cellNum] = cell.getStringCellValue();
+//                            } else if (cell.getCellType() == 1) {
+//                                rowValue[cellNum] = cell.getStringCellValue();
                             } else {
                                 rowValue[cellNum] = cell.getStringCellValue();
                             }
