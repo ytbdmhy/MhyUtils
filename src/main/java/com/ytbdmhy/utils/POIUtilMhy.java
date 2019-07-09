@@ -152,24 +152,26 @@ public class POIUtilMhy {
                 }
                 i = 1;
             }
+
             if (size == 1) {
-                createSheetData(dataList, sheet);
+                createSheetData(dataList, sheet, i);
             } else {
+                int x = i;
                 if (isLinkedList) {
                     LinkedList<Object[]> indexList = new LinkedList<>();
                     indexList.addAll(dataList.subList(index * sheetSize
                             , (index * sheetSize + sheetSize - 1) > dataList.size() ? dataList.size() : index * sheetSize + sheetSize));
-                    createSheetData(indexList, sheet);
+                    createSheetData(indexList, sheet, x);
                 } else {
-                    for (int z = 0, x = (index == size-1 ? dataList.size() + sheetSize - (sheetSize * size) : sheetSize); z < x; z++) {
-                        Row row = sheet.createRow(i);
+                    for (int y = 0, z = (index == size-1 ? dataList.size() + sheetSize - (sheetSize * size) : sheetSize); y < z; y++) {
+                        Row row = sheet.createRow(x);
                         int j = 0;
                         for (Object colData : dataList.get(z + (index * sheetSize))) {
                             Cell cell = row.createCell(j, CellType.STRING);
                             cell.setCellValue(StringUtils.isEmpty(colData) ? null : String.valueOf(colData));
                             j++;
                         }
-                        i++;
+                        x++;
                     }
                 }
             }
@@ -191,8 +193,7 @@ public class POIUtilMhy {
         }
     }
 
-    private static void createSheetData(List<Object[]> dataList, Sheet sheet) {
-        int i = 0;
+    private static void createSheetData(List<Object[]> dataList, Sheet sheet, int i) {
         for (Object[] rowData : dataList) {
             Row row = sheet.createRow(i);
             int j = 0;
@@ -246,7 +247,9 @@ public class POIUtilMhy {
             strings[3] = i + 1 + "-4";
             data.add(strings);
         }
-        exportExcel("C:\\Users\\Administrator\\Desktop/MapTest.xlsx", data);
+        exportExcel("C:\\Users\\Administrator\\Desktop/MapTest.xlsx"
+                , new String[]{"title-1", "title-2", "title-3", "title-4"}
+                , data);
         // 导出350万条4列小字符串
         // ArrayList 耗时 33.445秒
         // LinkedList 耗时 30.928秒
