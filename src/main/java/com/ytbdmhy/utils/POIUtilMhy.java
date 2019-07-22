@@ -17,7 +17,7 @@ import java.util.List;
  * @author: miaohaoyun
  * @since:
  * @history: created in 10:02 2019-06-11 created by miaohaoyun
- * @Remarks: poi 3.17; poi-ooxml 3.17; poi-scratchpad 3.17
+ * @Remarks: poi 3.17; poi-ooxml 3.17; poi-scratchpad 3.17; xlsx-streamer 2.1.0
  */
 public class POIUtilMhy {
 
