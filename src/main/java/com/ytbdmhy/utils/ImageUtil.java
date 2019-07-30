@@ -1,8 +1,12 @@
 package com.ytbdmhy.utils;
 
 import net.coobird.thumbnailator.Thumbnails;
+import sun.misc.BASE64Encoder;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @Copyright: weface
@@ -14,28 +18,47 @@ import java.io.IOException;
  */
 public class ImageUtil {
 
-
+    public static String imageToBase64() {
+        String imagePath = "C:\\Users\\Administrator\\Desktop\\circle.png";
+        InputStream inputStream = null;
+        byte[] data = null;
+        try {
+            inputStream = new FileInputStream(imagePath);
+            data = new byte[inputStream.available()];
+            inputStream.read(data);
+            inputStream.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        BASE64Encoder encoder = new BASE64Encoder();
+        String base64 = encoder.encode(data);
+        System.out.println(base64);
+        return base64;
+    }
 
     public static void main(String[] args) {
-        String imagePath = "C:/Users/Administrator/Desktop/微信图片_20190702191917.jpg";
-        String pre = imagePath.substring(0, imagePath.indexOf(".jpg"));
-        long start = System.currentTimeMillis();
-        try {
-            // 该方法可至1.06MB 但dpi将至96，影响打印效果
-            Thumbnails.of(imagePath)
 
-                    // 图片尺寸不变，压缩图片文件大小
-                    .scale(1f)
-                    .outputFormat("png")
-                    .outputQuality(1f)
-                    .toFile(pre + "_png");
 
-            Thumbnails.of(pre + "_png.png")
-                    .scale(1f)
-                    .outputQuality(0.94f)
-                    .outputFormat("jpg")
-                    .toFile(pre + "_0.1QJpg");
-
+//        String imagePath = "C:/Users/Administrator/Desktop/微信图片_20190702191917.jpg";
+//        String pre = imagePath.substring(0, imagePath.indexOf(".jpg"));
+//        long start = System.currentTimeMillis();
+//        try {
+//            // 该方法可至1.06MB 但dpi将至96，影响打印效果
+//            Thumbnails.of(imagePath)
+//
+//                    // 图片尺寸不变，压缩图片文件大小
+//                    .scale(1f)
+//                    .outputFormat("png")
+//                    .outputQuality(1f)
+//                    .toFile(pre + "_png");
+//
+//            Thumbnails.of(pre + "_png.png")
+//                    .scale(1f)
+//                    .outputQuality(0.94f)
+//                    .outputFormat("jpg")
+//                    .toFile(pre + "_0.1QJpg");
 
 //            Thumbnails.of(imagePath)
 //
@@ -88,9 +111,9 @@ public class ImageUtil {
                     // 指定大小进行缩放
 //                    .size(200, 300)
 //                    .toFile(imagePath.substring(0, imagePath.indexOf(".jpg")) + "_200×300.jpg");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println("over,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println("over,耗时:" + (System.currentTimeMillis() - start) + "毫秒");
     }
 }
