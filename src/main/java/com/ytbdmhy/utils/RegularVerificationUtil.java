@@ -3,11 +3,8 @@ package com.ytbdmhy.utils;
 import org.springframework.util.StringUtils;
 
 /**
- * @Copyright:
- * @Description: 正则验证工具类
- * @author: miaohaoyun
- * @since:
- * @history: created in 15:49 2019-06-05 created by miaohaoyun
+ * 正则验证工具类
+ * Created by miaohaoyun on 2019/08/08.
  */
 public class RegularVerificationUtil {
 

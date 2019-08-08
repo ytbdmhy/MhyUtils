@@ -1,6 +1,5 @@
 package com.ytbdmhy.utils;
 
-import com.monitorjbl.xlsx.StreamingReader;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -8,15 +7,11 @@ import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.util.LinkedList;
-import java.util.List;
 
 /**
- * @Copyright:
- * @Description: POI工具类
- * @author: miaohaoyun
- * @since:
- * @history: created in 10:02 2019-06-11 created by miaohaoyun
- * @Remarks: poi 3.17; poi-ooxml 3.17; poi-scratchpad 3.17
+ * POI工具类
+ * Created by miaohaoyun on 2019/08/08.
+ * poi 3.17; poi-ooxml 3.17; poi-scratchpad 3.17
  */
 public class POIUtilMhy2 {
 

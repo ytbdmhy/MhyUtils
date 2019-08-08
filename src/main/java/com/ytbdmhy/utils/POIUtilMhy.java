@@ -11,19 +11,15 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * @Copyright:
- * @Description: POI工具类
- * @author: miaohaoyun
- * @since:
- * @history: created in 10:02 2019-06-11 created by miaohaoyun
- * @Remarks: poi 3.17; poi-ooxml 3.17; poi-scratchpad 3.17; xlsx-streamer 2.1.0
+ * POI工具类
+ * Created by miaohaoyun on 2019/06/xx.
+ * poi 3.17; poi-ooxml 3.17; poi-scratchpad 3.17; xlsx-streamer 2.1.0
  */
 public class POIUtilMhy {
 

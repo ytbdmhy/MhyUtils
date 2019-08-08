@@ -5,11 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * @Copyright: weface
- * @Description: 日期分组工具类
- * @author: miaohaoyun
- * @since:
- * @history: created in 13:31 2019-06-24 created by miaohaoyun
+ * 日期分组工具类
+ * created by miaohaoyun on 2019/XX/XX
  */
 public class DateGroupUtilMhy {
 

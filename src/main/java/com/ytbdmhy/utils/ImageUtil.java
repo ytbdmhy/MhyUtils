@@ -8,12 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * @Copyright: weface
- * @Description:
- * @author: miaohaoyun
- * @since:
- * @history: created in 10:36 2019-06-21 created by miaohaoyun
- * @Remarks: thumbnailator 0.48
+ * created in 10:36 2019-06-21 created by miaohaoyun
+ * thumbnailator 0.48
  */
 public class ImageUtil {
 
