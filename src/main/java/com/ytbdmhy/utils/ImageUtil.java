@@ -4,7 +4,6 @@ import net.coobird.thumbnailator.Thumbnails;
 import sun.misc.BASE64Encoder;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -26,11 +25,14 @@ public class ImageUtil {
             inputStream = new FileInputStream(imagePath);
             data = new byte[inputStream.available()];
             inputStream.read(data);
-            inputStream.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         BASE64Encoder encoder = new BASE64Encoder();
         String base64 = encoder.encode(data);

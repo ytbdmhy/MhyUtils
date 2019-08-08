@@ -1,5 +1,8 @@
 package com.ytbdmhy.utils;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class TimeThread extends Thread {
 
     private volatile boolean stopMark = false;
@@ -13,8 +16,10 @@ public class TimeThread extends Thread {
 
     @Override
     public void run() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.sss");
         int i = 0;
         while (!stopMark) {
+            System.out.println("现在是:" + dateFormat.format(new Date()));
             System.out.println("第" + i + "个" + interval + "秒过去了。。。");
             i++;
             try {

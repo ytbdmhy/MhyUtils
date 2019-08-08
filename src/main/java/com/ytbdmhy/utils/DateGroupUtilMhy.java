@@ -115,8 +115,8 @@ public class DateGroupUtilMhy {
     }
 
     public static void main(String[] args) {
-        String start = "2019-05-22";
-        String end = "2019-06-24";
+        String start = "2019-08-19";
+        String end = "2019-05-26";
         for (String[] week : getWeekGroup(start, end)) {
             System.out.println(Arrays.toString(week));
         }
