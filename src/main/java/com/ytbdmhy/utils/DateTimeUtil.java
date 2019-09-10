@@ -30,4 +30,9 @@ public class DateTimeUtil {
         calendar.set(Calendar.DAY_OF_MONTH, 0);
         return dateFormat.format(calendar.getTime());
     }
+
+    public static void main(String[] args) {
+        System.out.println(getThisMonthStartDate());
+        System.out.println(getThisMonthEndDate());
+    }
 }
