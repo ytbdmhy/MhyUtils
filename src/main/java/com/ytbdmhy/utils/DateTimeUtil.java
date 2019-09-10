@@ -11,8 +11,8 @@ public class DateTimeUtil {
     }
 
     public static String getDateYear(Date date) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return dateFormat.format(date).substring(0, 4);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy");
+        return dateFormat.format(date);
     }
 
     public static String getThisMonthStartDate() {
@@ -32,7 +32,6 @@ public class DateTimeUtil {
     }
 
     public static void main(String[] args) {
-        System.out.println(getThisMonthStartDate());
-        System.out.println(getThisMonthEndDate());
+        System.out.println(getTodayYear());
     }
 }
