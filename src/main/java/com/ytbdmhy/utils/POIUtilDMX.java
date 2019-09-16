@@ -177,7 +177,7 @@ public class POIUtilDMX {
             ++i;
         }
 
-        if (filePath.indexOf(".xls") < 0)
+        if (!filePath.contains(".xls"))
             filePath += ".xlsx";
 
         POIUtilMhy.outPutStreamExcel(workbook, filePath);

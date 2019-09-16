@@ -18,9 +18,11 @@ public class DateStringValidateUtil {
         if (dateString.replace(":", "").length() == dateString.length()) {
             if (dateString.length() < 17) {
                 int temp = dateString.length();
+                StringBuilder dateStringBuilder = new StringBuilder(dateString);
                 for (int i = 0; i < 17 - temp; i++) {
-                    dateString += "0";
+                    dateStringBuilder.append("0");
                 }
+                dateString = dateStringBuilder.toString();
             }
             dateString = dateString.substring(0, 13) + ":" + dateString.substring(13, 15) + ":" + dateString.substring(15);
         }
