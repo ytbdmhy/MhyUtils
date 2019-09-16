@@ -1,6 +1,5 @@
 package com.ytbdmhy.utils;
 
-import net.coobird.thumbnailator.Thumbnails;
 import sun.misc.BASE64Encoder;
 
 import java.io.FileInputStream;
