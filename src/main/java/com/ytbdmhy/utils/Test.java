@@ -1,18 +1,11 @@
 package com.ytbdmhy.utils;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.TreeMap;
 
 public class Test {
 
     public static void main(String[] args) throws UnsupportedEncodingException {
-        String test = "1@%E5%BE%90";
-//        System.out.println(new String(test.getBytes(StandardCharsets.UTF_8), "GBK"));
-        System.out.println(test.indexOf("@"));
-        System.out.println(test.substring(0,6));
-        System.out.println(test.substring(1));
+
 
         System.out.println(System.currentTimeMillis());
 
@@ -27,4 +20,5 @@ public class Test {
 //
 //        System.out.println("over");
     }
+
 }
