@@ -7,13 +7,13 @@ import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.TreeMap;
+import java.net.URLEncoder;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -25,6 +25,9 @@ public class POIUtilMhy {
 
     // 导出excel的每sheet的最大行数限制
     private static final int sheetSize = 800000;
+
+    // 默认列宽
+    private static final int defaultWeight = 10 * 256;
 
     public static String[] readExcelFirstRow(String filePath) {
         return StringUtils.isEmpty(filePath) ? null : readExcelFirstRow(new File(filePath));
@@ -46,7 +49,8 @@ public class POIUtilMhy {
             }
         }
         try {
-            workbook.close();
+            if (workbook != null)
+                workbook.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -95,7 +99,8 @@ public class POIUtilMhy {
             }
         }
         try {
-            workbook.close();
+            if (workbook != null)
+                workbook.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -107,12 +112,46 @@ public class POIUtilMhy {
     }
 
     public static void exportExcel(String exportPath, String[] firstRow, List<Object[]> dataList) {
-        boolean isLinkedList = dataList.getClass() == LinkedList.class;
         if (dataList == null || dataList.size() == 0)
 //            throw new NullPointerException("将要导出excel的数据为空");
             return;
         if (!exportPath.toLowerCase().endsWith(".xls") && !exportPath.toLowerCase().endsWith(".xlsx"))
             exportPath += ".xlsx";
+        // 创建工作簿
+        LinkedHashMap<String, Integer> map = new LinkedHashMap<>();
+        for (String string : firstRow) {
+            map.put(string, defaultWeight);
+        }
+        outPutStreamExcel(getWorkbook(null, map, dataList), exportPath);
+    }
+
+    /**
+     * 按照格式化导出excel
+     * @param response
+     * @param title 标题
+     * @param firstRowMap 表头首行
+     * @param dataList 内容
+     */
+    public static void formatExportExcel(HttpServletResponse response, String title, LinkedHashMap<String, Integer> firstRowMap, List<Object[]> dataList) {
+        Workbook workbook = getWorkbook(title, firstRowMap, dataList);
+        if (workbook != null) {
+            OutputStream outputStream = null;
+            try {
+                response.setContentType("application/force-download");
+                response.setCharacterEncoding("UTF-8");
+                response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(title + System.currentTimeMillis(), "UTF-8"));
+                outputStream = response.getOutputStream();
+                workbook.write(outputStream);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                closeOutputStreamAndWorkbook(outputStream, workbook);
+            }
+        }
+    }
+
+    private static Workbook getWorkbook(String title, LinkedHashMap<String, Integer> firstRowMap, List<Object[]> dataList) {
+        boolean isLinkedList = dataList.getClass() == LinkedList.class;
         // 创建工作簿
         Workbook workbook;
         if (dataList.size() > 60000) {
@@ -124,6 +163,13 @@ public class POIUtilMhy {
         for (int index = 0,size = dataList.size() / sheetSize + 1; index < size; index++) {
             // 创建工作表
             Sheet sheet = workbook.createSheet();
+
+            // 如有表头,合并单元格
+            if (!StringUtils.isEmpty(title) && firstRowMap != null && firstRowMap.size() > 1) {
+                CellRangeAddress cellRangeAddress = new CellRangeAddress(0, 0, 0, firstRowMap.size() - 1);
+                setRegionBorderNone(cellRangeAddress, sheet);
+            }
+
             // 创建单元格格式
             CellStyle cellStyle = workbook.createCellStyle();
             // 创建字体
@@ -131,45 +177,81 @@ public class POIUtilMhy {
             // 设置字体大小
             font.setFontHeightInPoints((short) 11);
             // 设置字体是否加粗
-            font.setBold(true);
+            //        font.setBold(true);
             // 设置字体名称
             font.setFontName("Calibri");
             // 在样式应用设置的字体
             cellStyle.setFont(font);
             // 设置字体换行
-            cellStyle.setWrapText(false);
-            int i = 0;
-            if (firstRow.length > 0) {
-                Row row = sheet.createRow(0);
+            //        cellStyle.setWrapText(true);
+            // 设置边框
+            cellStyle.setBorderTop(BorderStyle.THIN);
+            cellStyle.setBorderBottom(BorderStyle.THIN);
+            cellStyle.setBorderLeft(BorderStyle.THIN);
+            cellStyle.setBorderRight(BorderStyle.THIN);
+            // 内容水平居中
+            cellStyle.setAlignment(HorizontalAlignment.CENTER);
+            // 内容垂直居中
+            cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+            int dataFirstRow = 0;
+
+            if (!StringUtils.isEmpty(title)) {
+                // 第一行
+                Row titleRow = sheet.getRow(dataFirstRow);
                 // 设置行高
-                row.setHeight((short) (20 * 15));
-                for (String colData : firstRow) {
-                    // 创建对应的单元格
-                    Cell cell = row.createCell(i);
-                    // 设置单元格的数据类型为文本
-                    cell.setCellType(CellType.STRING);
-                    // 设置单元格的数值
-                    cell.setCellValue(StringUtils.isEmpty(colData) ? null : colData);
-                    i++;
+                titleRow.setHeight((short) (20 * 40));
+                Cell titleRowCell = titleRow.createCell(0, CellType.STRING);
+                CellStyle titleCS = workbook.createCellStyle();
+                XSSFFont titleFont = (XSSFFont) workbook.createFont();
+                titleFont.setFontHeightInPoints((short) 16);
+                titleFont.setBold(true);
+                titleFont.setFontName("Calibri");
+                titleCS.setFont(titleFont);
+                titleCS.setVerticalAlignment(VerticalAlignment.CENTER);
+                titleCS.setAlignment(HorizontalAlignment.CENTER);
+                titleRowCell.setCellStyle(titleCS);
+                titleRowCell.setCellValue(title);
+                ++dataFirstRow;
+            }
+
+            if (firstRowMap != null) {
+                // 表头首行
+                Row firstRow = sheet.createRow(dataFirstRow);
+                firstRow.setHeight((short) (20 * 20));
+                CellStyle firstCS = workbook.createCellStyle();
+                XSSFFont firstFont = (XSSFFont) workbook.createFont();
+                firstFont.setFontHeightInPoints((short) 11);
+                firstFont.setFontName("Calibri");
+                firstFont.setColor(Font.COLOR_RED);
+                firstCS.setFont(firstFont);
+                setCellBorder(firstCS);
+                firstCS.setVerticalAlignment(VerticalAlignment.CENTER);
+                firstCS.setAlignment(HorizontalAlignment.CENTER);
+                // 设置列宽
+                int temp = 0;
+                for (Map.Entry<String, Integer> entry : firstRowMap.entrySet()) {
+                    sheet.setColumnWidth(temp, entry.getValue());
+                    setCell(firstRow, firstCS, temp, entry.getKey());
+                    ++temp;
                 }
-                i = 1;
+                ++dataFirstRow;
             }
 
             if (size == 1) {
-                createSheetData(dataList, sheet, i);
+                createSheetData(dataList, sheet, dataFirstRow, cellStyle);
             } else {
-                int x = i;
+                int x = dataFirstRow;
                 if (isLinkedList) {
-                    LinkedList<Object[]> indexList = new LinkedList<>();
-                    indexList.addAll(dataList.subList(index * sheetSize
+                    LinkedList<Object[]> indexList = new LinkedList<>(dataList.subList(index * sheetSize
                             , (index * sheetSize + sheetSize - 1) > dataList.size() ? dataList.size() : index * sheetSize + sheetSize));
-                    createSheetData(indexList, sheet, x);
+                    createSheetData(indexList, sheet, x, cellStyle);
                 } else {
-                    for (int y = 0, z = (index == size-1 ? dataList.size() + sheetSize - (sheetSize * size) : sheetSize); y < z; y++) {
+                    for (int y = 0, z = (index == size - 1 ? dataList.size() + sheetSize - (sheetSize * size) : sheetSize); y < z; y++) {
                         Row row = sheet.createRow(x);
                         int j = 0;
                         for (Object colData : dataList.get(z + (index * sheetSize))) {
                             Cell cell = row.createCell(j, CellType.STRING);
+                            cell.setCellStyle(cellStyle);
                             cell.setCellValue(StringUtils.isEmpty(colData) ? null : String.valueOf(colData));
                             j++;
                         }
@@ -178,115 +260,33 @@ public class POIUtilMhy {
                 }
             }
         }
-        outPutStreamExcel(workbook, exportPath);
+        return workbook;
     }
 
-    /**
-     * 按照格式化导出excel
-     * @param response
-     * @param title 标题
-     * @param firstRowMap 表头首行
-     * @param dataList 文件内容
-     * @throws Exception
-     */
-    public static void formatExportExcel(HttpServletResponse response, String title, TreeMap<String, Integer> firstRowMap, List<String[]> dataList) {
-        // 创建工作簿
-        Workbook workbook;
-        if (dataList.size() > 60000) {
-            workbook = new SXSSFWorkbook();
-        } else {
-            workbook = new XSSFWorkbook();
-        }
-        // 创建工作表
-        Sheet sheet = workbook.createSheet();
-
-        // 如有表头,合并单元格
-        if (firstRowMap != null && firstRowMap.size() > 1) {
-            CellRangeAddress cellRangeAddress = new CellRangeAddress(1, 1, 0, firstRowMap.size());
-            setRegionBorderNone(cellRangeAddress, sheet);
-        }
-
-        // 创建单元格格式
-        CellStyle cellStyle = workbook.createCellStyle();
-        // 创建字体
-        Font font = workbook.createFont();
-        // 设置字体大小
-        font.setFontHeightInPoints((short) 11);
-        // 设置字体是否加粗
-//        font.setBold(true);
-        // 设置字体名称
-        font.setFontName("Calibri");
-        // 在样式应用设置的字体
-        cellStyle.setFont(font);
-        // 设置字体换行
-//        cellStyle.setWrapText(true);
-        // 设置边框
-        cellStyle.setBorderTop(BorderStyle.THIN);
-        cellStyle.setBorderBottom(BorderStyle.THIN);
-        cellStyle.setBorderLeft(BorderStyle.THIN);
-        cellStyle.setBorderRight(BorderStyle.THIN);
-        // 内容水平居中
-        cellStyle.setAlignment(HorizontalAlignment.CENTER);
-        // 内容垂直居中
-        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        int dataFirstRow = 0;
-
-        if (!StringUtils.isEmpty(title)) {
-            // 第一行
-            Row titleRow = sheet.getRow(dataFirstRow);
-            // 设置行高
-            titleRow.setHeight((short) (20 * 40));
-            Cell titleRowCell = titleRow.createCell(0, CellType.STRING);
-            CellStyle titleCS = workbook.createCellStyle();
-            XSSFFont titleFont = (XSSFFont) workbook.createFont();
-            titleFont.setFontHeightInPoints((short) 16);
-            titleFont.setBold(true);
-            titleFont.setFontName("Calibri");
-            titleCS.setFont(titleFont);
-            titleCS.setVerticalAlignment(VerticalAlignment.CENTER);
-            titleCS.setAlignment(HorizontalAlignment.CENTER);
-            titleRowCell.setCellStyle(titleCS);
-            titleRowCell.setCellValue(title);
-            ++dataFirstRow;
-        }
-
-        if (firstRowMap != null) {
-            // 表头首行
-            Row firstRow = sheet.getRow(dataFirstRow);
-            firstRow.setHeight((short) (20 * 20));
-            CellStyle firstCS = workbook.createCellStyle();
-            XSSFFont firstFont = (XSSFFont) workbook.createFont();
-            firstFont.setFontHeightInPoints((short) 11);
-            firstFont.setFontName("Calibri");
-            firstCS.setFont(firstFont);
-            setCellBorder(firstCS);
-            firstCS.setVerticalAlignment(VerticalAlignment.CENTER);
-            firstCS.setAlignment(HorizontalAlignment.CENTER);
-            // 设置列宽
-            AtomicInteger index = new AtomicInteger(0);
-            firstRowMap.forEach((content, width) -> {
-                sheet.setColumnWidth(index.get(), width);
-                setCell(firstRow, firstCS, index.get(), content);
-                index.incrementAndGet();
-            });
-            sheet.setColumnWidth(0, 12 * 256);
-            ++dataFirstRow;
-        }
-
-        // 循环输入dataList内容
-        int rowLength = dataList.get(0).length;
-        for (String[] rowData : dataList) {
-            Row row = sheet.createRow(dataFirstRow);
-            for (int j = 0; j < 9; j++) {
-                if (j < rowLength) {
-                    setCell(row, cellStyle, j, rowData[j]);
-                } else {
-                    setCell(row, cellStyle, j, "");
-                }
+    private static Workbook getWorkbook(File file) {
+        if (file == null)
+//            throw new NullPointerException("excel不存在");
+            return null;
+        String fileName = file.getName();
+        if (!fileName.toLowerCase().endsWith(".xls") && !fileName.toLowerCase().endsWith(".xlsx"))
+//            throw new NullPointerException("读取的文件不是excel");
+            return null;
+        Workbook workbook = null;
+        try {
+            // 获取文件的IO流
+            InputStream inputStream = new FileInputStream(file);
+            if (fileName.toLowerCase().endsWith(".xls")) {
+                workbook = WorkbookFactory.create(inputStream);
+            } else if (fileName.toLowerCase().endsWith(".xlsx")) {
+                workbook = StreamingReader.builder()
+                        .rowCacheSize(100)
+                        .bufferSize(4096)
+                        .open(inputStream);
             }
-            ++dataFirstRow;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
+        return workbook;
     }
 
     private static void setCell(Row row, CellStyle cellStyle, int cellNum, String cellValue) {
@@ -323,12 +323,16 @@ public class POIUtilMhy {
         }
     }
 
-    private static void createSheetData(List<Object[]> dataList, Sheet sheet, int i) {
+    private static void createSheetData(List<Object[]> dataList, Sheet sheet, int i, CellStyle cellStyle) {
+        if (CollectionUtils.isEmpty(dataList) || sheet == null)
+            return;
         for (Object[] rowData : dataList) {
             Row row = sheet.createRow(i);
             int j = 0;
             for (Object colData : rowData) {
                 Cell cell = row.createCell(j, CellType.STRING);
+                if (cellStyle != null)
+                    cell.setCellStyle(cellStyle);
                 cell.setCellValue(StringUtils.isEmpty(colData) ? null : String.valueOf(colData));
                 j++;
             }
@@ -336,31 +340,17 @@ public class POIUtilMhy {
         }
     }
 
-    private static Workbook getWorkbook(File file) {
-        if (file == null)
-//            throw new NullPointerException("excel不存在");
-            return null;
-        String fileName = file.getName();
-        if (!fileName.toLowerCase().endsWith(".xls") && !fileName.toLowerCase().endsWith(".xlsx"))
-//            throw new NullPointerException("读取的文件不是excel");
-            return null;
-
-        Workbook workbook = null;
+    private static void closeOutputStreamAndWorkbook(OutputStream outputStream, Workbook workbook) {
         try {
-            // 获取文件的IO流
-            InputStream inputStream = new FileInputStream(file);
-            if (fileName.toLowerCase().endsWith(".xls")) {
-                workbook = WorkbookFactory.create(inputStream);
-            } else if (fileName.toLowerCase().endsWith(".xlsx")) {
-                workbook = StreamingReader.builder()
-                        .rowCacheSize(100)
-                        .bufferSize(4096)
-                        .open(inputStream);
+            if (outputStream != null) {
+                outputStream.flush();
+                outputStream.close();
             }
-        } catch (Exception e) {
+            if (workbook != null)
+                workbook.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        return workbook;
     }
 
     public static void main(String[] args) throws FileNotFoundException {
