@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * POI工具类
@@ -24,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class POIUtilMhy {
 
     // 导出excel的每sheet的最大行数限制
-    private static final int sheetSize = 800000;
+    private static final int sheetSize = 1000000;
 
     // 默认列宽
     private static final int defaultWeight = 10 * 256;
@@ -115,42 +114,47 @@ public class POIUtilMhy {
         if (dataList == null || dataList.size() == 0)
 //            throw new NullPointerException("将要导出excel的数据为空");
             return;
-        if (!exportPath.toLowerCase().endsWith(".xls") && !exportPath.toLowerCase().endsWith(".xlsx"))
-            exportPath += ".xlsx";
-        // 创建工作簿
-        LinkedHashMap<String, Integer> map = new LinkedHashMap<>();
-        for (String string : firstRow) {
-            map.put(string, defaultWeight);
-        }
-        outPutStreamExcel(getWorkbook(null, map, dataList), exportPath);
+        outPutToExportPath(complementExportPath(exportPath), getWorkbook(null, stringArrayToMap(firstRow), dataList));
     }
 
-    /**
-     * 按照格式化导出excel
-     * @param response
-     * @param title 标题
-     * @param firstRowMap 表头首行
-     * @param dataList 内容
-     */
+    public static void formatExportExcel(HttpServletResponse response, String title, String[] firstRowMap, List<Object[]> dataList) {
+        formatExportExcel(response, title, firstRowMap, dataList, false);
+    }
+
     public static void formatExportExcel(HttpServletResponse response, String title, LinkedHashMap<String, Integer> firstRowMap, List<Object[]> dataList) {
-        Workbook workbook = getWorkbook(title, firstRowMap, dataList);
-        if (workbook != null) {
-            OutputStream outputStream = null;
-            try {
-                response.setContentType("application/force-download");
-                response.setCharacterEncoding("UTF-8");
-                response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(title + System.currentTimeMillis(), "UTF-8"));
-                outputStream = response.getOutputStream();
-                workbook.write(outputStream);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                closeOutputStreamAndWorkbook(outputStream, workbook);
-            }
-        }
+        formatExportExcel(response, title, firstRowMap, dataList, false);
+    }
+
+    public static void formatExportExcel(HttpServletResponse response, String title, String[] firstRowMap, List<Object[]> dataList, boolean needMergeTitle) {
+        formatExportExcel(response, title, stringArrayToMap(firstRowMap), dataList, needMergeTitle);
+    }
+
+    public static void formatExportExcel(HttpServletResponse response, String title, LinkedHashMap<String, Integer> firstRowMap, List<Object[]> dataList, boolean needMergeTitle) {
+        outPutToResponse(response, getWorkbook(title, firstRowMap, dataList, needMergeTitle), title);
+    }
+
+    public static void formatExportExcel(String exportPath, String title, String[] firstRowMap, List<Object[]> dataList) {
+        formatExportExcel(exportPath, title, stringArrayToMap(firstRowMap), dataList, false);
+    }
+
+    public static void formatExportExcel(String exportPath, String title, String[] firstRowMap, List<Object[]> dataList, boolean needMergeTitle) {
+        formatExportExcel(exportPath, title, stringArrayToMap(firstRowMap), dataList, needMergeTitle);
+    }
+
+    public static void formatExportExcel(String exportPath, String title, LinkedHashMap<String, Integer> firstRowMap, List<Object[]> dataList) {
+        outPutToExportPath(exportPath, getWorkbook(title, firstRowMap, dataList, false));
+    }
+
+    public static void formatExportExcel(String exportPath, String title, LinkedHashMap<String, Integer> firstRowMap, List<Object[]> dataList, boolean needMergeTitle) {
+        outPutToExportPath(exportPath, getWorkbook(title, firstRowMap, dataList, needMergeTitle));
     }
 
     private static Workbook getWorkbook(String title, LinkedHashMap<String, Integer> firstRowMap, List<Object[]> dataList) {
+        return getWorkbook(title, firstRowMap, dataList, false);
+    }
+
+    private static Workbook getWorkbook(String title, LinkedHashMap<String, Integer> firstRowMap, List<Object[]> dataList, boolean needMergeTitle) {
+        long start = System.currentTimeMillis();
         boolean isLinkedList = dataList.getClass() == LinkedList.class;
         // 创建工作簿
         Workbook workbook;
@@ -159,59 +163,23 @@ public class POIUtilMhy {
         } else {
             workbook = new XSSFWorkbook();
         }
-
+        // 创建单元格格式
+        CellStyle cellStyle = getCellStyleOfWorkbook(workbook);
         for (int index = 0,size = dataList.size() / sheetSize + 1; index < size; index++) {
+            long a1 = System.currentTimeMillis();
             // 创建工作表
             Sheet sheet = workbook.createSheet();
-
-            // 如有表头,合并单元格
-            if (!StringUtils.isEmpty(title) && firstRowMap != null && firstRowMap.size() > 1) {
-                CellRangeAddress cellRangeAddress = new CellRangeAddress(0, 0, 0, firstRowMap.size() - 1);
-                setRegionBorderNone(cellRangeAddress, sheet);
-            }
-
-            // 创建单元格格式
-            CellStyle cellStyle = workbook.createCellStyle();
-            // 创建字体
-            Font font = workbook.createFont();
-            // 设置字体大小
-            font.setFontHeightInPoints((short) 11);
-            // 设置字体是否加粗
-            //        font.setBold(true);
-            // 设置字体名称
-            font.setFontName("Calibri");
-            // 在样式应用设置的字体
-            cellStyle.setFont(font);
-            // 设置字体换行
-            //        cellStyle.setWrapText(true);
-            // 设置边框
-            cellStyle.setBorderTop(BorderStyle.THIN);
-            cellStyle.setBorderBottom(BorderStyle.THIN);
-            cellStyle.setBorderLeft(BorderStyle.THIN);
-            cellStyle.setBorderRight(BorderStyle.THIN);
-            // 内容水平居中
-            cellStyle.setAlignment(HorizontalAlignment.CENTER);
-            // 内容垂直居中
-            cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
             int dataFirstRow = 0;
 
-            if (!StringUtils.isEmpty(title)) {
-                // 第一行
-                Row titleRow = sheet.getRow(dataFirstRow);
-                // 设置行高
-                titleRow.setHeight((short) (20 * 40));
-                Cell titleRowCell = titleRow.createCell(0, CellType.STRING);
-                CellStyle titleCS = workbook.createCellStyle();
-                XSSFFont titleFont = (XSSFFont) workbook.createFont();
-                titleFont.setFontHeightInPoints((short) 16);
-                titleFont.setBold(true);
-                titleFont.setFontName("Calibri");
-                titleCS.setFont(titleFont);
-                titleCS.setVerticalAlignment(VerticalAlignment.CENTER);
-                titleCS.setAlignment(HorizontalAlignment.CENTER);
-                titleRowCell.setCellStyle(titleCS);
-                titleRowCell.setCellValue(title);
-                ++dataFirstRow;
+            // 如有表头且需要合并,合并单元格
+            if (needMergeTitle && !StringUtils.isEmpty(title)) {
+                if (firstRowMap != null && firstRowMap.size() > 1) {
+                    mergeTitle(workbook, sheet, title, firstRowMap.size(), dataFirstRow);
+                    ++dataFirstRow;
+                } else if (!CollectionUtils.isEmpty(dataList) && dataList.get(0) != null && dataList.get(0).length > 1) {
+                    mergeTitle(workbook, sheet, title, dataList.get(0).length, dataFirstRow);
+                    ++dataFirstRow;
+                }
             }
 
             if (firstRowMap != null) {
@@ -238,28 +206,23 @@ public class POIUtilMhy {
             }
 
             if (size == 1) {
-                createSheetData(dataList, sheet, dataFirstRow, cellStyle);
+                createSheetDataUseEnhance(dataList, sheet, dataFirstRow, cellStyle);
             } else {
-                int x = dataFirstRow;
+                long b1 = System.currentTimeMillis();
                 if (isLinkedList) {
-                    LinkedList<Object[]> indexList = new LinkedList<>(dataList.subList(index * sheetSize
-                            , (index * sheetSize + sheetSize - 1) > dataList.size() ? dataList.size() : index * sheetSize + sheetSize));
-                    createSheetData(indexList, sheet, x, cellStyle);
+                    LinkedList<Object[]> indexList = new LinkedList<>(dataList.subList(index * sheetSize, (index * sheetSize + sheetSize - 1) > dataList.size() ? dataList.size() : index * sheetSize + sheetSize));
+                    createSheetDataUseEnhance(indexList, sheet, dataFirstRow, cellStyle);
                 } else {
-                    for (int y = 0, z = (index == size - 1 ? dataList.size() + sheetSize - (sheetSize * size) : sheetSize); y < z; y++) {
-                        Row row = sheet.createRow(x);
-                        int j = 0;
-                        for (Object colData : dataList.get(z + (index * sheetSize))) {
-                            Cell cell = row.createCell(j, CellType.STRING);
-                            cell.setCellStyle(cellStyle);
-                            cell.setCellValue(StringUtils.isEmpty(colData) ? null : String.valueOf(colData));
-                            j++;
-                        }
-                        x++;
-                    }
+                    createSheetDataUseNormal(dataList, sheet, dataFirstRow, index, size, cellStyle);
                 }
+                long b2 = System.currentTimeMillis();
+                System.out.println("第" + index + "次设置单元格内容耗时:" + (b2 - b1) + "毫秒");
             }
+            long a2 = System.currentTimeMillis();
+            System.out.println("第" + index + "次大循环完成,耗时:" + (a2 - a1) + "毫秒");
         }
+        long end = System.currentTimeMillis();
+        System.out.println("生成workbook用时:" + (end - start) + "毫秒");
         return workbook;
     }
 
@@ -289,9 +252,122 @@ public class POIUtilMhy {
         return workbook;
     }
 
+    private static void mergeTitle(Workbook workbook, Sheet sheet, String title, int lastCol, int dataFirstRow) {
+        CellRangeAddress cellRangeAddress = new CellRangeAddress(0, 0, 0, lastCol - 1);
+        setRegionBorderNone(cellRangeAddress, sheet);
+        // 第一行
+        Row titleRow = sheet.getRow(dataFirstRow);
+        // 设置行高
+        titleRow.setHeight((short) (20 * 40));
+        Cell titleRowCell = titleRow.createCell(0, CellType.STRING);
+        CellStyle titleCS = workbook.createCellStyle();
+        XSSFFont titleFont = (XSSFFont) workbook.createFont();
+        titleFont.setFontHeightInPoints((short) 16);
+        titleFont.setBold(true);
+        titleFont.setFontName("Calibri");
+        titleCS.setFont(titleFont);
+        titleCS.setVerticalAlignment(VerticalAlignment.CENTER);
+        titleCS.setAlignment(HorizontalAlignment.CENTER);
+        titleRowCell.setCellStyle(titleCS);
+        titleRowCell.setCellValue(title);
+    }
+
+    private static void outPutToExportPath(String exportPath, Workbook workbook) {
+        long start = System.currentTimeMillis();
+        if (workbook != null) {
+            FileOutputStream fileOutputStream = null;
+            try {
+                fileOutputStream = new FileOutputStream(exportPath);
+                workbook.write(fileOutputStream);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                closeOutputStreamAndWorkbook(fileOutputStream, workbook);
+            }
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("导出excel用时:" + (end - start) + "毫秒");
+    }
+
+    private static void outPutToResponse(HttpServletResponse response, Workbook workbook, String title) {
+        if (workbook != null) {
+            OutputStream outputStream = null;
+            try {
+                response.setContentType("application/force-download");
+                response.setCharacterEncoding("UTF-8");
+                response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(title + System.currentTimeMillis(), "UTF-8"));
+                outputStream = response.getOutputStream();
+                workbook.write(outputStream);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                closeOutputStreamAndWorkbook(outputStream, workbook);
+            }
+        }
+    }
+
+    private static void createSheetDataUseEnhance(List<Object[]> dataList, Sheet sheet, int i, CellStyle cellStyle) {
+        if (CollectionUtils.isEmpty(dataList) || sheet == null)
+            return;
+        for (Object[] rowData : dataList) {
+            Row row = sheet.createRow(i);
+            int j = 0;
+            for (Object colData : rowData) {
+                setCell(row, cellStyle, j, StringUtils.isEmpty(colData) ? null : String.valueOf(colData));
+                j++;
+            }
+            i++;
+        }
+    }
+
+    private static void createSheetDataUseNormal(List<Object[]> dataList, Sheet sheet, int x, int index, int size, CellStyle cellStyle) {
+        if (CollectionUtils.isEmpty(dataList) || sheet == null)
+            return;
+        for (int y = 0, z = (index == size - 1 ? dataList.size() + sheetSize - (sheetSize * size) : sheetSize); y < z; y++) {
+            Row row = sheet.createRow(x);
+            int j = 0;
+            for (Object colData : dataList.get(y + (index * sheetSize))) {
+                setCell(row, cellStyle, j, StringUtils.isEmpty(colData) ? null : String.valueOf(colData));
+                j++;
+            }
+            x++;
+        }
+    }
+
+    private static CellStyle getCellStyleOfWorkbook(Workbook workbook) {
+        CellStyle cellStyle = workbook.createCellStyle();
+        setCellFontStyle(workbook, cellStyle);
+        // 设置字体换行
+        //        cellStyle.setWrapText(true);
+        // 设置边框
+        cellStyle.setBorderTop(BorderStyle.THIN);
+        cellStyle.setBorderBottom(BorderStyle.THIN);
+        cellStyle.setBorderLeft(BorderStyle.THIN);
+        cellStyle.setBorderRight(BorderStyle.THIN);
+        // 内容水平居中
+        cellStyle.setAlignment(HorizontalAlignment.CENTER);
+        // 内容垂直居中
+        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        return cellStyle;
+    }
+
+    private static void setCellFontStyle(Workbook workbook, CellStyle cellStyle) {
+        // 创建字体
+        Font font = workbook.createFont();
+        // 设置字体大小
+        font.setFontHeightInPoints((short) 11);
+        // 设置字体是否加粗
+        //        font.setBold(true);
+        // 设置字体名称
+        font.setFontName("Calibri");
+        // 在样式应用设置的字体
+        cellStyle.setFont(font);
+    }
+
     private static void setCell(Row row, CellStyle cellStyle, int cellNum, String cellValue) {
         Cell cell = row.createCell(cellNum, CellType.STRING);
-        cell.setCellStyle(cellStyle);
+        if (cellStyle != null)
+            cell.setCellStyle(cellStyle);
         cell.setCellValue(cellValue);
     }
 
@@ -310,34 +386,8 @@ public class POIUtilMhy {
         RegionUtil.setBorderTop(BorderStyle.NONE, cellRangeAddress, sheet); // 上边框
     }
 
-    public static void outPutStreamExcel(Workbook workbook, String exportPath) {
-        if (workbook != null) {
-            try {
-                FileOutputStream fileOutputStream = new FileOutputStream(exportPath);
-                workbook.write(fileOutputStream);
-                fileOutputStream.flush();
-                fileOutputStream.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private static void createSheetData(List<Object[]> dataList, Sheet sheet, int i, CellStyle cellStyle) {
-        if (CollectionUtils.isEmpty(dataList) || sheet == null)
-            return;
-        for (Object[] rowData : dataList) {
-            Row row = sheet.createRow(i);
-            int j = 0;
-            for (Object colData : rowData) {
-                Cell cell = row.createCell(j, CellType.STRING);
-                if (cellStyle != null)
-                    cell.setCellStyle(cellStyle);
-                cell.setCellValue(StringUtils.isEmpty(colData) ? null : String.valueOf(colData));
-                j++;
-            }
-            i++;
-        }
+    private static String complementExportPath(String exportPath) {
+        return !StringUtils.isEmpty(exportPath) && !exportPath.toLowerCase().endsWith(".xls") && !exportPath.toLowerCase().endsWith(".xlsx") ? exportPath + ".xlsx" : exportPath;
     }
 
     private static void closeOutputStreamAndWorkbook(OutputStream outputStream, Workbook workbook) {
@@ -353,11 +403,21 @@ public class POIUtilMhy {
         }
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
-        System.out.println("start");
-        long startTime = System.currentTimeMillis();
+    private static LinkedHashMap<String, Integer> stringArrayToMap(String[] firstRow) {
+        if (firstRow == null || firstRow.length == 0)
+            return null;
+        LinkedHashMap<String, Integer> map = new LinkedHashMap<>();
+        for (String string : firstRow) {
+            map.put(string, defaultWeight);
+        }
+        return map;
+    }
 
-        List<Object[]> data = new LinkedList<>();
+    public static void main(String[] args) {
+        System.out.println("start");
+
+        long startTime = System.currentTimeMillis();
+        LinkedList<Object[]> data = new LinkedList<>();
         String[] strings;
         for (int i = 0; i < 3500000; i++) {
             strings = new String[4];
@@ -367,13 +427,14 @@ public class POIUtilMhy {
             strings[3] = i + 1 + "-4";
             data.add(strings);
         }
-        exportExcel("C:\\Users\\Administrator\\Desktop/MapTest.xlsx"
-                , new String[]{"title-1", "title-2", "title-3", "title-4"}
-                , data);
+        long a1 = System.currentTimeMillis();
+        System.out.println("生成dataList用时:" + (a1 - startTime) + "毫秒");
+
+        formatExportExcel("C:\\Users\\Administrator\\Desktop\\MapTest.xlsx", "test", new String[]{}, data, true);
         // 导出350万条4列小字符串
         // ArrayList 耗时 33.445秒
         // LinkedList 耗时 30.928秒
-
-        System.out.println("over,用时:" + (System.currentTimeMillis() - startTime) + "毫秒");
+        long a2 = System.currentTimeMillis();
+        System.out.println("生成excel用时:" + (a2 - a1) + "毫秒");
     }
 }
