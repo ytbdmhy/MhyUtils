@@ -154,7 +154,6 @@ public class POIUtilMhy {
     }
 
     private static Workbook getWorkbook(String title, LinkedHashMap<String, Integer> firstRowMap, List<Object[]> dataList, boolean needMergeTitle) {
-        long start = System.currentTimeMillis();
         boolean isLinkedList = dataList.getClass() == LinkedList.class;
         // 创建工作簿
         Workbook workbook;
@@ -208,21 +207,14 @@ public class POIUtilMhy {
             if (size == 1) {
                 createSheetDataUseEnhance(dataList, sheet, dataFirstRow, cellStyle);
             } else {
-                long b1 = System.currentTimeMillis();
                 if (isLinkedList) {
                     LinkedList<Object[]> indexList = new LinkedList<>(dataList.subList(index * sheetSize, (index * sheetSize + sheetSize - 1) > dataList.size() ? dataList.size() : index * sheetSize + sheetSize));
                     createSheetDataUseEnhance(indexList, sheet, dataFirstRow, cellStyle);
                 } else {
                     createSheetDataUseNormal(dataList, sheet, dataFirstRow, index, size, cellStyle);
                 }
-                long b2 = System.currentTimeMillis();
-                System.out.println("第" + index + "次设置单元格内容耗时:" + (b2 - b1) + "毫秒");
             }
-            long a2 = System.currentTimeMillis();
-            System.out.println("第" + index + "次大循环完成,耗时:" + (a2 - a1) + "毫秒");
         }
-        long end = System.currentTimeMillis();
-        System.out.println("生成workbook用时:" + (end - start) + "毫秒");
         return workbook;
     }
 
@@ -273,7 +265,6 @@ public class POIUtilMhy {
     }
 
     private static void outPutToExportPath(String exportPath, Workbook workbook) {
-        long start = System.currentTimeMillis();
         if (workbook != null) {
             FileOutputStream fileOutputStream = null;
             try {
@@ -285,8 +276,6 @@ public class POIUtilMhy {
                 closeOutputStreamAndWorkbook(fileOutputStream, workbook);
             }
         }
-        long end = System.currentTimeMillis();
-        System.out.println("导出excel用时:" + (end - start) + "毫秒");
     }
 
     private static void outPutToResponse(HttpServletResponse response, Workbook workbook, String title) {
