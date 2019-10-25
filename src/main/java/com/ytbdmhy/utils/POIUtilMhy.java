@@ -249,7 +249,7 @@ public class POIUtilMhy {
         // 第一行
         Row titleRow = sheet.getRow(dataFirstRow);
         // 设置行高
-        titleRow.setHeight((short) (20 * 40));
+        titleRow.setHeight((short) (10 * 40));
         Cell titleRowCell = titleRow.createCell(0, CellType.STRING);
         CellStyle titleCS = workbook.createCellStyle();
         XSSFFont titleFont = (XSSFFont) workbook.createFont();
