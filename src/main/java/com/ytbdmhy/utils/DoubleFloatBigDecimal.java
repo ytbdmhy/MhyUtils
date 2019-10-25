@@ -2,7 +2,7 @@ package com.ytbdmhy.utils;
 
 import java.math.BigDecimal;
 
-public class Test2 {
+public class DoubleFloatBigDecimal {
 
     public static void main(String[] args) {
         double d1 = 0.15;

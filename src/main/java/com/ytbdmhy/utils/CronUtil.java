@@ -22,7 +22,7 @@ public class CronUtil {
      * @return
      */
     public static String getCron(Date date) {
-        return Objects.nonNull(date) ? cronFormat.format(date) : null;
+        return date == null ? null : cronFormat.format(date);
     }
 
     /**
@@ -44,4 +44,8 @@ public class CronUtil {
         return getCron(date);
     }
 
+    public static void main(String[] args) {
+        String date = "2019-10-24";
+        System.out.println(getCron(date));
+    }
 }
