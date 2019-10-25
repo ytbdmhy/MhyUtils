@@ -1,4 +1,4 @@
-package com.ytbdmhy.utils;
+package com.ytbdmhy.basics;
 
 import org.springframework.util.StringUtils;
 
