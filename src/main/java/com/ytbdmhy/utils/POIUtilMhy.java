@@ -106,16 +106,16 @@ public class POIUtilMhy {
         return result;
     }
 
-    public static void exportExcel(String exportPath, List<Object[]> dataList) {
-        exportExcel(exportPath, new String[]{}, dataList);
-    }
-
-    public static void exportExcel(String exportPath, String[] firstRow, List<Object[]> dataList) {
-        if (dataList == null || dataList.size() == 0)
-//            throw new NullPointerException("将要导出excel的数据为空");
-            return;
-        outPutToExportPath(complementExportPath(exportPath), getWorkbook(null, stringArrayToMap(firstRow), dataList));
-    }
+//    public static void exportExcel(String exportPath, List<Object[]> dataList) {
+//        exportExcel(exportPath, new String[]{}, dataList);
+//    }
+//
+//    public static void exportExcel(String exportPath, String[] firstRow, List<Object[]> dataList) {
+//        if (dataList == null || dataList.size() == 0)
+////            throw new NullPointerException("将要导出excel的数据为空");
+//            return;
+//        outPutToExportPath(complementExportPath(exportPath), getWorkbook(null, stringArrayToMap(firstRow), dataList));
+//    }
 
     public static void formatExportExcel(HttpServletResponse response, String title, String[] firstRowMap, List<Object[]> dataList) {
         formatExportExcel(response, title, firstRowMap, dataList, false);
