@@ -165,7 +165,6 @@ public class POIUtilMhy {
         // 创建单元格格式
         CellStyle cellStyle = getCellStyleOfWorkbook(workbook);
         for (int index = 0,size = dataList.size() / sheetSize + 1; index < size; index++) {
-            long a1 = System.currentTimeMillis();
             // 创建工作表
             Sheet sheet = workbook.createSheet();
             int dataFirstRow = 0;
