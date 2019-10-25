@@ -188,7 +188,7 @@ public class POIUtilMhy {
                 XSSFFont firstFont = (XSSFFont) workbook.createFont();
                 firstFont.setFontHeightInPoints((short) 11);
                 firstFont.setFontName("Calibri");
-                firstFont.setColor(Font.COLOR_RED);
+//                firstFont.setColor(Font.COLOR_RED);
                 firstCS.setFont(firstFont);
                 setCellBorder(firstCS);
                 firstCS.setVerticalAlignment(VerticalAlignment.CENTER);
@@ -283,7 +283,7 @@ public class POIUtilMhy {
             try {
                 response.setContentType("application/force-download");
                 response.setCharacterEncoding("UTF-8");
-                response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(title + System.currentTimeMillis(), "UTF-8"));
+                response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(title + System.currentTimeMillis() + ".xlsx", "UTF-8"));
                 outputStream = response.getOutputStream();
                 workbook.write(outputStream);
             } catch (IOException e) {
