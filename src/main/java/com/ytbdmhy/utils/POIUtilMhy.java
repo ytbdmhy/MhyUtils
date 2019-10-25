@@ -56,11 +56,11 @@ public class POIUtilMhy {
         return firstRow;
     }
 
-    public static List readExcel(String filePath) {
+    public static List<String[]> readExcel(String filePath) {
         return StringUtils.isEmpty(filePath) ? null : readExcel(new File(filePath));
     }
 
-    public static List readExcel(File file) {
+    public static List<String[]> readExcel(File file) {
         List<String[]> result = new LinkedList<>();
         Workbook workbook = getWorkbook(file);
         if (workbook != null) {
