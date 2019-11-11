@@ -1,5 +1,10 @@
 package com.ytbdmhy.utils;
 
+import com.ytbdmhy.pojo.InvokeTest;
+import com.ytbdmhy.pojo.PoiInvokeTest;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -62,5 +67,25 @@ public class ReflectionUtil {
             }
         }
         return queryMethod;
+    }
+
+    public static void test(Object object) {
+        Class<?> clazz = object.getClass();
+        Annotation[] annotations = clazz.getAnnotations();
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            System.out.println(field.getName());
+            Annotation[] fieldAnnotations = field.getAnnotations();
+            System.out.println();
+        }
+        System.out.println("over");
+    }
+
+    public static void main(String[] args) {
+        InvokeTest invokeTest = new InvokeTest();
+        invokeTest.setAddress("test address");
+        invokeTest.setAge(20);
+        invokeTest.setName("test name");
+        test(invokeTest);
     }
 }
