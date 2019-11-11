@@ -2,6 +2,7 @@ package com.ytbdmhy.utils;
 
 import com.ytbdmhy.pojo.PoiInvokeTest;
 import com.ytbdmhy.pojo.poi.POIEntity;
+import com.ytbdmhy.pojo.poi.POIHeaderIndex;
 import com.ytbdmhy.pojo.poi.annotation.PoiTableHeader;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -11,6 +12,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 public class POIInvokeUtilMhy extends POIUtilMhy {
@@ -23,26 +25,37 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
         Class<?> clazz = poiEntity.getDataList().get(0).getClass();
         Field[] fields = clazz.getDeclaredFields();
         Method[] methods = new Method[fields.length];
-        Field[] hasFields = new Field[fields.length];
+        List<Field> hasFields = new ArrayList<>();
         LinkedHashMap<String, Integer> firstRow = new LinkedHashMap<>();
+        List<POIHeaderIndex> headerIndices = new ArrayList<>();
         int i = 0;
         for (Field field : fields) {
             Annotation[] fieldAnnotations = field.getAnnotations();
             if (fieldAnnotations != null && fieldAnnotations.length > 0) {
                 for (Annotation annotation : fieldAnnotations) {
                     if (annotation.annotationType().equals(PoiTableHeader.class)) {
-                        hasFields[i] = field;
+                        POIHeaderIndex headerIndex = new POIHeaderIndex();
+                        PoiTableHeader header = (PoiTableHeader) annotation;
+                        headerIndex.setHeader(header);
+                        headerIndex.setIndex(header.index());
+                        headerIndex.setField(field);
+                        headerIndices.add(headerIndex);
+                        hasFields.add(field);
                         methods[i] = ReflectionUtil.getMethod(clazz, "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1), null);
                         ++i;
                     }
                 }
             }
         }
-        if (i == 0) {
+        if (headerIndices.size() == 0) {
             return;
         } else {
             i = 0;
             // TODO 处理methods的排序和去空
+            Field[] hasField = new Field[headerIndices.size()];
+            for (POIHeaderIndex headerIndex : headerIndices) {
+                
+            }
         }
         List<Object[]> excelData = new ArrayList<>();
 
