@@ -19,9 +19,9 @@ public class IncreaseImageSizeUtil {
                     .append("+")
                     .append(rarPath)
                     .append(" ")
-                    // 此处是增大图片后导出的绝对路径
+                    // 1.导出路径1:此处是增大图片后导出的绝对路径
                     .append(exportPath).append(imagePath.substring(imagePath.lastIndexOf("\\")));
-                    // 如果不使用导出路径，图片可直接替换原文件
+                    // 2.导出路径2:如果不使用导出路径1,图片可直接替换原文件
 //                    .append(imagePath);
             System.out.println(String.valueOf(cmdTxt));
             try {
