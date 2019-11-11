@@ -22,7 +22,6 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
             return;
         Class<?> clazz = poiEntity.getDataList().get(0).getClass();
         Field[] fields = clazz.getDeclaredFields();
-        boolean hasTableHeader = false;
         Method[] methods = new Method[fields.length];
         Field[] hasFields = new Field[fields.length];
         LinkedHashMap<String, Integer> firstRow = new LinkedHashMap<>();
@@ -32,7 +31,6 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
             if (fieldAnnotations != null && fieldAnnotations.length > 0) {
                 for (Annotation annotation : fieldAnnotations) {
                     if (annotation.annotationType().equals(PoiTableHeader.class)) {
-                        hasTableHeader = true;
                         hasFields[i] = field;
                         methods[i] = ReflectionUtil.getMethod(clazz, "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1), null);
                         ++i;
@@ -40,14 +38,13 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
                 }
             }
         }
-        if (!hasTableHeader) {
+        if (i == 0) {
             return;
         } else {
-
+            i = 0;
+            // TODO 处理methods的排序和去空
         }
         List<Object[]> excelData = new ArrayList<>();
-
-        // TODO 处理methods的排序和去空
 
         // TODO poiEntity的dataList根据hasHFields转换成excelData
         for (int j = 0; j < poiEntity.getDataList().size(); j++) {
