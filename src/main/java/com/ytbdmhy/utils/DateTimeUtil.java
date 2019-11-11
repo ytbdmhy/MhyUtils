@@ -31,6 +31,13 @@ public class DateTimeUtil {
         return dateFormat.format(calendar.getTime());
     }
 
+    public static void aaa() {
+        // 昨天的时间的Date
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, -24);
+        Date yesterdayDate = calendar.getTime();
+    }
+
     public static void main(String[] args) {
         System.out.println(getTodayYear());
     }
