@@ -3,13 +3,14 @@ package com.ytbdmhy.utils;
 import com.ytbdmhy.pojo.PoiInvokeTest;
 import com.ytbdmhy.pojo.poi.POIEntity;
 import com.ytbdmhy.pojo.poi.annotation.PoiTableHeader;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class POIInvokeUtilMhy extends POIUtilMhy {
@@ -22,7 +23,9 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
         Class<?> clazz = poiEntity.getDataList().get(0).getClass();
         Field[] fields = clazz.getDeclaredFields();
         boolean hasTableHeader = false;
-        Field[] hasHFields = new Field[fields.length];
+        Method[] methods = new Method[fields.length];
+        Field[] hasFields = new Field[fields.length];
+        LinkedHashMap<String, Integer> firstRow = new LinkedHashMap<>();
         int i = 0;
         for (Field field : fields) {
             Annotation[] fieldAnnotations = field.getAnnotations();
@@ -30,17 +33,40 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
                 for (Annotation annotation : fieldAnnotations) {
                     if (annotation.annotationType().equals(PoiTableHeader.class)) {
                         hasTableHeader = true;
-                        hasHFields[i] = field;
+                        hasFields[i] = field;
+                        methods[i] = ReflectionUtil.getMethod(clazz, "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1), null);
                         ++i;
                     }
                 }
             }
         }
-        if (!hasTableHeader)
+        if (!hasTableHeader) {
             return;
+        } else {
 
+        }
+        List<Object[]> excelData = new ArrayList<>();
 
-        List<String[]> excelData = new ArrayList<>();
+        // TODO 处理methods的排序和去空
+
+        // TODO poiEntity的dataList根据hasHFields转换成excelData
+        for (int j = 0; j < poiEntity.getDataList().size(); j++) {
+            String[] strings = new String[methods.length];
+            Object object = poiEntity.getDataList().get(j);
+            int k = 0;
+            for (Method method : methods) {
+                try {
+                    Object row = method.invoke(object);
+                    strings[k] = row == null ? null : String.valueOf(row);
+                } catch (Exception e) {
+                    strings[k] = null;
+                }
+                ++k;
+            }
+            excelData.add(strings);
+        }
+
+        POIUtilMhy.formatExportExcel(poiEntity.getExportPath(), poiEntity.getTitle(), firstRow , excelData);
         System.out.println("over");
     }
 

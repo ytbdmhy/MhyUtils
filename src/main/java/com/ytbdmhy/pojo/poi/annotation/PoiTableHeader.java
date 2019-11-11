@@ -6,6 +6,8 @@ import java.lang.annotation.*;
 @Documented
 public @interface PoiTableHeader {
 
+    String value() default "";
+
     int index() default 0;
 
     int width() default 10;
