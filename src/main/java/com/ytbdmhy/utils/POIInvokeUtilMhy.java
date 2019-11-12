@@ -88,6 +88,10 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
         // TODO poiEntity的dataList根据methods转换成excelData
         List<Object[]> excelData = new ArrayList<>();
         for (Object object : poiEntity.getDataList()) {
+
+            ReflectionUtil.getFieldValue(object, "index");
+            System.out.println();
+
             String[] strings = new String[methods.length];
             int l = 0;
             for (Method method : methods) {

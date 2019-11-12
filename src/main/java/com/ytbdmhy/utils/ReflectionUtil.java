@@ -1,6 +1,7 @@
 package com.ytbdmhy.utils;
 
 import com.ytbdmhy.pojo.InvokeTest;
+import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -66,6 +67,19 @@ public class ReflectionUtil {
             }
         }
         return queryMethod;
+    }
+
+    public static Object getFieldValue(Object object, String fieldName) {
+        if (object == null || StringUtils.isEmpty(fieldName))
+            return null;
+        try {
+            Field field = object.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.get(object);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static void test(Object object) {
