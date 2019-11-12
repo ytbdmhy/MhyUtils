@@ -13,8 +13,8 @@ import java.lang.reflect.Method;
 public class ReflectionUtil {
 
     /**
-     * 通过反射，根据Dao层对象、方法名、参数，执行Dao层方法
-     * @param object Dao层对象
+     * 通过反射，根据对象、方法名、参数，执行方法
+     * @param object 对象
      * @param method 方法名
      * @param args 参数
      * @return
