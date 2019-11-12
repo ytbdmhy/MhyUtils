@@ -35,4 +35,8 @@ public class POIHeaderIndex {
     public void setIndex(int index) {
         this.index = index;
     }
+
+    public int compare(POIHeaderIndex second) {
+        return Integer.compare(this.index, second.index);
+    }
 }

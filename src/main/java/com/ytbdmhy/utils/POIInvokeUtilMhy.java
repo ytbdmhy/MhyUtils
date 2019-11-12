@@ -12,7 +12,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 public class POIInvokeUtilMhy extends POIUtilMhy {
@@ -24,8 +23,6 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
             return;
         Class<?> clazz = poiEntity.getDataList().get(0).getClass();
         Field[] fields = clazz.getDeclaredFields();
-        Method[] methods = new Method[fields.length];
-        List<Field> hasFields = new ArrayList<>();
         LinkedHashMap<String, Integer> firstRow = new LinkedHashMap<>();
         List<POIHeaderIndex> headerIndices = new ArrayList<>();
         int i = 0;
@@ -40,26 +37,47 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
                         headerIndex.setIndex(header.index());
                         headerIndex.setField(field);
                         headerIndices.add(headerIndex);
-                        hasFields.add(field);
-                        methods[i] = ReflectionUtil.getMethod(clazz, "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1), null);
                         ++i;
                     }
                 }
             }
         }
+
+        Method[] methods = new Method[headerIndices.size()];
         if (headerIndices.size() == 0) {
             return;
         } else {
             i = 0;
-            // TODO 处理methods的排序和去空
-            Field[] hasField = new Field[headerIndices.size()];
+            // TODO 应该可优化:处理methods的排序和去空
+            POIHeaderIndex[] tempHeaders = new POIHeaderIndex[headerIndices.size()];
             for (POIHeaderIndex headerIndex : headerIndices) {
-                
+                if (i == 0) {
+                    tempHeaders[0] = headerIndex;
+                } else {
+                    for (int j = i - 1; j > -1; j--) {
+                        if (headerIndex.compare(tempHeaders[j]) > -1) {
+                            if (j == i - 1) {
+                                tempHeaders[i] = headerIndex;
+                            } else {
+                                for (int k = i; k > j + 1; k --) {
+                                    tempHeaders[k] = tempHeaders[k - 1];
+                                }
+                                tempHeaders[j + 1] = headerIndex;
+                            }
+                            break;
+                        }
+                    }
+                }
+                ++i;
+            }
+            i = 0;
+            for (POIHeaderIndex headerIndex : tempHeaders) {
+                methods[i] = ReflectionUtil.getMethod(clazz, "get" + headerIndex.getField().getName().substring(0, 1).toUpperCase() + headerIndex.getField().getName().substring(1), null);
+                firstRow.put(headerIndex.getHeader().value(), headerIndex.getHeader().width() * 256);
+                ++i;
             }
         }
         List<Object[]> excelData = new ArrayList<>();
-
-        // TODO poiEntity的dataList根据hasHFields转换成excelData
         for (int j = 0; j < poiEntity.getDataList().size(); j++) {
             String[] strings = new String[methods.length];
             Object object = poiEntity.getDataList().get(j);
@@ -77,7 +95,6 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
         }
 
         POIUtilMhy.formatExportExcel(poiEntity.getExportPath(), poiEntity.getTitle(), firstRow , excelData);
-        System.out.println("over");
     }
 
     public static void main(String[] args) {
