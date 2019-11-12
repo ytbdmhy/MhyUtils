@@ -70,6 +70,13 @@
           <version>2.1.0</version>
       </dependency>
 
+      <!-- 解决POI的一个异常:java.lang.NoClassDefFoundError: org/w3c/dom/ElementTraversal -->
+      <dependency>
+          <groupId>xml-apis</groupId>
+          <artifactId>xml-apis</artifactId>
+          <version>1.4.01</version>
+      </dependency>
+
       <!-- 图片处理 -->
       <dependency>
           <groupId>net.coobird</groupId>

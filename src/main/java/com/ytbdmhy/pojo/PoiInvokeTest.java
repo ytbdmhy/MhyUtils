@@ -13,12 +13,12 @@ public class PoiInvokeTest {
     @PoiTableHeader(value = "年龄", index = 3, width = 10)
     private String age;
 
-    @PoiTableHeader(value = "姓名", index = 2, width = 20)
+    @PoiTableHeader(value = "姓名", index = 2, width = 25)
     private String name;
 
     private String remark;
 
-    @PoiTableHeader(value = "已婚", index = 2)
+    @PoiTableHeader(value = "已婚", index = 2, width = 15)
     private boolean marry;
 
     public String getIndex() {

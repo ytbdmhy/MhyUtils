@@ -44,7 +44,8 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
             }
         }
 
-        Method[] methods = new Method[headerIndices.size()];
+//        Method[] methods = new Method[headerIndices.size()];
+        Field[] sortFields = new Field[headerIndices.size()];
         if (headerIndices.size() == 0) {
             return;
         } else {
@@ -72,15 +73,20 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
                 ++i;
             }
             i = 0;
+//            for (POIHeaderIndex headerIndex : tempHeaders) {
+//                // TODO boolean类型的私有属性的get方法的前缀为"is"
+//                if (headerIndex.getField().getType().equals(boolean.class)
+//                        || headerIndex.getField().getType().equals(Boolean.class)) {
+//                    methods[i] = ReflectionUtil.getMethod(clazz, "is" + headerIndex.getField().getName().substring(0, 1).toUpperCase() + headerIndex.getField().getName().substring(1), null);
+//                } else {
+//                    methods[i] = ReflectionUtil.getMethod(clazz, "get" + headerIndex.getField().getName().substring(0, 1).toUpperCase() + headerIndex.getField().getName().substring(1), null);
+//                }
+//                firstRow.put(headerIndex.getHeader().value(), headerIndex.getHeader().width() * 256);
+//                ++i;
+//            }
             for (POIHeaderIndex headerIndex : tempHeaders) {
-                // TODO boolean类型的私有属性的get方法的前缀为"is"
-                if (headerIndex.getField().getType().equals(boolean.class)
-                        || headerIndex.getField().getType().equals(Boolean.class)) {
-                    methods[i] = ReflectionUtil.getMethod(clazz, "is" + headerIndex.getField().getName().substring(0, 1).toUpperCase() + headerIndex.getField().getName().substring(1), null);
-                } else {
-                    methods[i] = ReflectionUtil.getMethod(clazz, "get" + headerIndex.getField().getName().substring(0, 1).toUpperCase() + headerIndex.getField().getName().substring(1), null);
-                }
-                firstRow.put(headerIndex.getHeader().value(), headerIndex.getHeader().width() * 256);
+                sortFields[i] = headerIndex.getField();
+                firstRow.put(headerIndex.getHeader().value(), headerIndex.getHeader().width() * 264);
                 ++i;
             }
         }
@@ -88,19 +94,20 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
         // TODO poiEntity的dataList根据methods转换成excelData
         List<Object[]> excelData = new ArrayList<>();
         for (Object object : poiEntity.getDataList()) {
-
-            ReflectionUtil.getFieldValue(object, "index");
-            System.out.println();
-
-            String[] strings = new String[methods.length];
+            String[] strings = new String[sortFields.length];
             int l = 0;
-            for (Method method : methods) {
-                try {
-                    Object row = method.invoke(object);
-                    strings[l] = row == null ? null : String.valueOf(row);
-                } catch (Exception e) {
-                    strings[l] = null;
-                }
+//            for (Method method : methods) {
+//                try {
+//                    Object row = method.invoke(object);
+//                    strings[l] = row == null ? null : String.valueOf(row);
+//                } catch (Exception e) {
+//                    strings[l] = null;
+//                }
+//                ++l;
+//            }
+            for (Field field : sortFields) {
+                Object row = ReflectionUtil.getFieldValue(object, field.getName());
+                strings[l] = row == null ? null : String.valueOf(row);
                 ++l;
             }
             excelData.add(strings);
