@@ -29,7 +29,7 @@ public class POIUtilMhy {
     // 导出excel的每sheet的最大行数限制
     private static final int sheetSize = 1000000;
 
-    // 默认列宽
+    // 默认列宽为excel的10磅
     private static final int defaultWeight = 2730;
 
     public static String[] readExcelFirstRow(String filePath) {
