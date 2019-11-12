@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 public class POIInvokeUtilMhy extends POIUtilMhy {
@@ -48,7 +49,7 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
             return;
         } else {
             i = 0;
-            // TODO 应该可优化:处理methods的排序
+            // TODO 应该可优化:处理methods的排序和去空
             POIHeaderIndex[] tempHeaders = new POIHeaderIndex[headerIndices.size()];
             for (POIHeaderIndex headerIndex : headerIndices) {
                 if (i == 0) {
@@ -59,7 +60,9 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
                             if (j == i - 1) {
                                 tempHeaders[i] = headerIndex;
                             } else {
-                                if (i - j + 1 >= 0) System.arraycopy(tempHeaders, j + 1, tempHeaders, j + 2, i - j + 1);
+                                for (int k = i; k > j + 1; k --) {
+                                    tempHeaders[k] = tempHeaders[k - 1];
+                                }
                                 tempHeaders[j + 1] = headerIndex;
                             }
                             break;
@@ -75,19 +78,20 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
                 ++i;
             }
         }
+
+        // TODO poiEntity的dataList根据hasHFields转换成excelData
         List<Object[]> excelData = new ArrayList<>();
-        for (int j = 0; j < poiEntity.getDataList().size(); j++) {
+        for (Object object : poiEntity.getDataList()) {
             String[] strings = new String[methods.length];
-            Object object = poiEntity.getDataList().get(j);
-            int k = 0;
+            int l = 0;
             for (Method method : methods) {
                 try {
                     Object row = method.invoke(object);
-                    strings[k] = row == null ? null : String.valueOf(row);
+                    strings[l] = row == null ? null : String.valueOf(row);
                 } catch (Exception e) {
-                    strings[k] = null;
+                    strings[l] = null;
                 }
-                ++k;
+                ++l;
             }
             excelData.add(strings);
         }
@@ -98,8 +102,8 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
     public static void main(String[] args) {
         POIEntity poiEntity = new POIEntity();
         poiEntity.setExportPath("C:\\Users\\Administrator\\Desktop\\poiInvokeTest.xlsx");
-        List<PoiInvokeTest> poiInvokeTestList = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
+        LinkedList<PoiInvokeTest> poiInvokeTestList = new LinkedList<>();
+        for (int i = 0; i < 3500000; i++) {
             PoiInvokeTest poiTest = new PoiInvokeTest();
             poiTest.setName("test-name-" + i);
             poiTest.setAge(String.valueOf((int) (Math.random() * 100) + 1));
@@ -108,6 +112,11 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
         }
         poiEntity.setDataList(poiInvokeTestList);
         poiEntity.setTitle("poiInvokeTest");
+        long start = System.currentTimeMillis();
         export(poiEntity);
+        System.out.println("耗时:" + (System.currentTimeMillis() - start));
+        // 导出350W条3列小字符串
+        // ArrayList 耗时 27.321秒
+        // LinkedList 耗时 26.591秒
     }
 }
