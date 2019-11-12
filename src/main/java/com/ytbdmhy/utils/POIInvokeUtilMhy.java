@@ -9,7 +9,6 @@ import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -43,13 +42,12 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
                 }
             }
         }
-//        Method[] methods = new Method[headerIndices.size()];
         Field[] sortFields = new Field[headerIndices.size()];
         if (headerIndices.size() == 0) {
             return;
         } else {
             i = 0;
-            // TODO 应该可优化:处理methods的排序和去空
+            // TODO 应该可优化:处理tempHeaders的排序
             POIHeaderIndex[] tempHeaders = new POIHeaderIndex[headerIndices.size()];
             for (POIHeaderIndex headerIndex : headerIndices) {
                 if (i == 0) {
@@ -72,17 +70,6 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
                 ++i;
             }
             i = 0;
-//            for (POIHeaderIndex headerIndex : tempHeaders) {
-//                // boolean类型的私有属性的get方法的前缀为"is"
-//                if (headerIndex.getField().getType().equals(boolean.class)
-//                        || headerIndex.getField().getType().equals(Boolean.class)) {
-//                    methods[i] = ReflectionUtil.getMethod(clazz, "is" + headerIndex.getField().getName().substring(0, 1).toUpperCase() + headerIndex.getField().getName().substring(1), null);
-//                } else {
-//                    methods[i] = ReflectionUtil.getMethod(clazz, "get" + headerIndex.getField().getName().substring(0, 1).toUpperCase() + headerIndex.getField().getName().substring(1), null);
-//                }
-//                firstRow.put(headerIndex.getHeader().value(), headerIndex.getHeader().width() * 256);
-//                ++i;
-//            }
             for (POIHeaderIndex headerIndex : tempHeaders) {
                 sortFields[i] = headerIndex.getField();
                 firstRow.put(headerIndex.getHeader().value(), headerIndex.getHeader().width() * 264);
@@ -94,15 +81,6 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
         for (Object object : poiEntity.getDataList()) {
             String[] strings = new String[sortFields.length];
             int l = 0;
-//            for (Method method : methods) {
-//                try {
-//                    Object row = method.invoke(object);
-//                    strings[l] = row == null ? null : String.valueOf(row);
-//                } catch (Exception e) {
-//                    strings[l] = null;
-//                }
-//                ++l;
-//            }
             for (Field field : sortFields) {
                 Object row = ReflectionUtil.getFieldValue(object, field.getName());
                 strings[l] = row == null ? null : String.valueOf(row);
