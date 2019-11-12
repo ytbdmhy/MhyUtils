@@ -26,7 +26,7 @@ public class POIUtilMhy {
     private static final int sheetSize = 1000000;
 
     // 默认列宽
-    private static final int defaultWeight = 10 * 256;
+    private static final int defaultWeight = 2730;
 
     public static String[] readExcelFirstRow(String filePath) {
         return StringUtils.isEmpty(filePath) ? null : readExcelFirstRow(new File(filePath));
@@ -391,27 +391,42 @@ public class POIUtilMhy {
     }
 
     public static void main(String[] args) {
-        System.out.println("start");
+//        System.out.println("start");
+//
+//        long startTime = System.currentTimeMillis();
+//        LinkedList<Object[]> data = new LinkedList<>();
+//        String[] strings;
+//        for (int i = 0; i < 3500000; i++) {
+//            strings = new String[4];
+//            strings[0] = i + 1 + "-1";
+//            strings[1] = i + 1 + "-2";
+//            strings[2] = i + 1 + "-3";
+//            strings[3] = i + 1 + "-4";
+//            data.add(strings);
+//        }
+//        long a1 = System.currentTimeMillis();
+//        System.out.println("生成dataList用时:" + (a1 - startTime) + "毫秒");
+//
+//        formatExportExcel("C:\\Users\\Administrator\\Desktop\\MapTest.xlsx", "test", new String[]{}, data, true);
+//        // 导出350万条4列小字符串
+//        // ArrayList 耗时 33.445秒
+//        // LinkedList 耗时 30.928秒
+//        long a2 = System.currentTimeMillis();
+//        System.out.println("生成excel用时:" + (a2 - a1) + "毫秒");
 
-        long startTime = System.currentTimeMillis();
-        LinkedList<Object[]> data = new LinkedList<>();
-        String[] strings;
-        for (int i = 0; i < 3500000; i++) {
-            strings = new String[4];
-            strings[0] = i + 1 + "-1";
-            strings[1] = i + 1 + "-2";
-            strings[2] = i + 1 + "-3";
-            strings[3] = i + 1 + "-4";
-            data.add(strings);
+        List<Object[]> exportData = new ArrayList<>();
+        for (int i = 0; i < 350; i++) {
+            String[] strings = new String[5];
+            strings[0] = String.valueOf(i);
+            strings[1] = "test-name-" + i;
+            strings[2] = String.valueOf((int) (Math.random() * 2) + 1 == 1);
+            strings[3] = String.valueOf((int) (Math.random() * 100) + 1);
+            strings[4] = null;
+            exportData.add(strings);
         }
-        long a1 = System.currentTimeMillis();
-        System.out.println("生成dataList用时:" + (a1 - startTime) + "毫秒");
-
-        formatExportExcel("C:\\Users\\Administrator\\Desktop\\MapTest.xlsx", "test", new String[]{}, data, true);
-        // 导出350万条4列小字符串
-        // ArrayList 耗时 33.445秒
-        // LinkedList 耗时 30.928秒
-        long a2 = System.currentTimeMillis();
-        System.out.println("生成excel用时:" + (a2 - a1) + "毫秒");
+        long start2 = System.currentTimeMillis();
+        POIUtilMhy.formatExportExcel("C:\\Users\\Administrator\\Desktop\\poiInvokeTest2.xlsx"
+                , "poiInvokeTest2", new String[]{}, exportData);
+        System.out.println("2耗时:" + (System.currentTimeMillis() - start2));
     }
 }

@@ -17,7 +17,7 @@ import java.util.List;
 
 public class POIInvokeUtilMhy extends POIUtilMhy {
 
-    public static void export(POIEntity poiEntity) {
+    public static void invokeExport(POIEntity poiEntity) {
         if (CollectionUtils.isEmpty(poiEntity.getDataList())
                 || StringUtils.isEmpty(poiEntity.getTitle())
                 || StringUtils.isEmpty(poiEntity.getExportPath()))
@@ -43,7 +43,6 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
                 }
             }
         }
-
 //        Method[] methods = new Method[headerIndices.size()];
         Field[] sortFields = new Field[headerIndices.size()];
         if (headerIndices.size() == 0) {
@@ -90,7 +89,6 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
                 ++i;
             }
         }
-
         // poiEntity的dataList根据methods或sortFields转换成excelData
         List<Object[]> excelData = new ArrayList<>();
         for (Object object : poiEntity.getDataList()) {
@@ -112,8 +110,7 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
             }
             excelData.add(strings);
         }
-
-        POIUtilMhy.formatExportExcel(poiEntity.getExportPath(), poiEntity.getTitle(), firstRow , excelData);
+        POIUtilMhy.formatExportExcel(poiEntity.getExportPath(), poiEntity.getTitle(), firstRow , excelData, poiEntity.isNeedMergeTitle());
     }
 
     public static void main(String[] args) {
@@ -130,9 +127,10 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
         }
         poiEntity.setDataList(poiInvokeTestList);
         poiEntity.setTitle("poiInvokeTest");
+        poiEntity.setNeedMergeTitle(true);
         long start = System.currentTimeMillis();
-        export(poiEntity);
-        System.out.println("耗时:" + (System.currentTimeMillis() - start));
+        invokeExport(poiEntity);
+        System.out.println("1耗时:" + (System.currentTimeMillis() - start));
         // 导出350W条3列小字符串
         // ArrayList 耗时 27.321秒
         // LinkedList 耗时 26.591秒
