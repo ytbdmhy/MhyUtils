@@ -74,7 +74,7 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
             }
             i = 0;
 //            for (POIHeaderIndex headerIndex : tempHeaders) {
-//                // TODO boolean类型的私有属性的get方法的前缀为"is"
+//                // boolean类型的私有属性的get方法的前缀为"is"
 //                if (headerIndex.getField().getType().equals(boolean.class)
 //                        || headerIndex.getField().getType().equals(Boolean.class)) {
 //                    methods[i] = ReflectionUtil.getMethod(clazz, "is" + headerIndex.getField().getName().substring(0, 1).toUpperCase() + headerIndex.getField().getName().substring(1), null);
@@ -91,7 +91,7 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
             }
         }
 
-        // TODO poiEntity的dataList根据methods转换成excelData
+        // poiEntity的dataList根据methods或sortFields转换成excelData
         List<Object[]> excelData = new ArrayList<>();
         for (Object object : poiEntity.getDataList()) {
             String[] strings = new String[sortFields.length];
