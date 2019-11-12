@@ -48,7 +48,7 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
             return;
         } else {
             i = 0;
-            // TODO 应该可优化:处理methods的排序和去空
+            // TODO 应该可优化:处理methods的排序
             POIHeaderIndex[] tempHeaders = new POIHeaderIndex[headerIndices.size()];
             for (POIHeaderIndex headerIndex : headerIndices) {
                 if (i == 0) {
@@ -59,9 +59,7 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
                             if (j == i - 1) {
                                 tempHeaders[i] = headerIndex;
                             } else {
-                                for (int k = i; k > j + 1; k --) {
-                                    tempHeaders[k] = tempHeaders[k - 1];
-                                }
+                                if (i - j + 1 >= 0) System.arraycopy(tempHeaders, j + 1, tempHeaders, j + 2, i - j + 1);
                                 tempHeaders[j + 1] = headerIndex;
                             }
                             break;
