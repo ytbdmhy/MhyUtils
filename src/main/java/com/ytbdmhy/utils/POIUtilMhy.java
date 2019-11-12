@@ -18,7 +18,7 @@ import java.util.*;
 /**
  * POI工具类
  * Created by miaohaoyun on 2019/06/xx.
- * poi 4.1.1; poi-ooxml 4.1.1; poi-scratchpad 4.1.1; xlsx-streamer 2.1.0
+ * poi 4.1.1; poi-ooxml 4.1.1; poi-scratchpad 4.1.1; xlsx-streamer 2.1.0; xml-apis 1.4.01
  */
 public class POIUtilMhy {
 
