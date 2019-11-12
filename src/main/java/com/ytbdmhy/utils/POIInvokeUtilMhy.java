@@ -19,30 +19,25 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
     public static void invokeExport(POIEntity poiEntity) {
         if (CollectionUtils.isEmpty(poiEntity.getDataList())
                 || StringUtils.isEmpty(poiEntity.getTitle())
-                || StringUtils.isEmpty(poiEntity.getExportPath()))
+                || (StringUtils.isEmpty(poiEntity.getExportPath()) && poiEntity.getResponse() == null))
             return;
-        Class<?> clazz = poiEntity.getDataList().get(0).getClass();
-        Field[] fields = clazz.getDeclaredFields();
-        LinkedHashMap<String, Integer> firstRow = new LinkedHashMap<>();
         List<POIHeaderIndex> headerIndices = new ArrayList<>();
         int i = 0;
-        for (Field field : fields) {
-            Annotation[] fieldAnnotations = field.getAnnotations();
-            if (fieldAnnotations != null && fieldAnnotations.length > 0) {
-                for (Annotation annotation : fieldAnnotations) {
-                    if (annotation.annotationType().equals(PoiTableHeader.class)) {
-                        POIHeaderIndex headerIndex = new POIHeaderIndex();
-                        PoiTableHeader header = (PoiTableHeader) annotation;
-                        headerIndex.setHeader(header);
-                        headerIndex.setIndex(header.index());
-                        headerIndex.setField(field);
-                        headerIndices.add(headerIndex);
-                        ++i;
-                    }
+        for (Field field : poiEntity.getDataList().get(0).getClass().getDeclaredFields()) {
+            for (Annotation annotation : field.getAnnotations()) {
+                if (annotation.annotationType().equals(PoiTableHeader.class)) {
+                    POIHeaderIndex headerIndex = new POIHeaderIndex();
+                    PoiTableHeader header = (PoiTableHeader) annotation;
+                    headerIndex.setHeader(header);
+                    headerIndex.setIndex(header.index());
+                    headerIndex.setField(field);
+                    headerIndices.add(headerIndex);
+                    ++i;
                 }
             }
         }
         Field[] sortFields = new Field[headerIndices.size()];
+        LinkedHashMap<String, Integer> firstRow = new LinkedHashMap<>();
         if (headerIndices.size() == 0) {
             return;
         } else {
@@ -88,7 +83,11 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
             }
             excelData.add(strings);
         }
-        POIUtilMhy.formatExportExcel(poiEntity.getExportPath(), poiEntity.getTitle(), firstRow , excelData, poiEntity.isNeedMergeTitle());
+        if (poiEntity.getResponse() == null) {
+            POIUtilMhy.formatExportExcel(poiEntity.getExportPath(), poiEntity.getTitle(), firstRow , excelData, poiEntity.isNeedMergeTitle());
+        } else {
+            POIUtilMhy.formatExportExcel(poiEntity.getResponse(), poiEntity.getTitle(), firstRow , excelData, poiEntity.isNeedMergeTitle());
+        }
     }
 
     public static void main(String[] args) {
