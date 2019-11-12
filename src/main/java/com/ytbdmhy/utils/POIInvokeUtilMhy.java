@@ -73,13 +73,19 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
             }
             i = 0;
             for (POIHeaderIndex headerIndex : tempHeaders) {
-                methods[i] = ReflectionUtil.getMethod(clazz, "get" + headerIndex.getField().getName().substring(0, 1).toUpperCase() + headerIndex.getField().getName().substring(1), null);
+                // TODO boolean类型的私有属性的get方法的前缀为"is"
+                if (headerIndex.getField().getType().equals(boolean.class)
+                        || headerIndex.getField().getType().equals(Boolean.class)) {
+                    methods[i] = ReflectionUtil.getMethod(clazz, "is" + headerIndex.getField().getName().substring(0, 1).toUpperCase() + headerIndex.getField().getName().substring(1), null);
+                } else {
+                    methods[i] = ReflectionUtil.getMethod(clazz, "get" + headerIndex.getField().getName().substring(0, 1).toUpperCase() + headerIndex.getField().getName().substring(1), null);
+                }
                 firstRow.put(headerIndex.getHeader().value(), headerIndex.getHeader().width() * 256);
                 ++i;
             }
         }
 
-        // TODO poiEntity的dataList根据hasHFields转换成excelData
+        // TODO poiEntity的dataList根据methods转换成excelData
         List<Object[]> excelData = new ArrayList<>();
         for (Object object : poiEntity.getDataList()) {
             String[] strings = new String[methods.length];
@@ -103,11 +109,12 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
         POIEntity poiEntity = new POIEntity();
         poiEntity.setExportPath("C:\\Users\\Administrator\\Desktop\\poiInvokeTest.xlsx");
         LinkedList<PoiInvokeTest> poiInvokeTestList = new LinkedList<>();
-        for (int i = 0; i < 3500000; i++) {
+        for (int i = 0; i < 350; i++) {
             PoiInvokeTest poiTest = new PoiInvokeTest();
             poiTest.setName("test-name-" + i);
             poiTest.setAge(String.valueOf((int) (Math.random() * 100) + 1));
             poiTest.setIndex(String.valueOf(i));
+            poiTest.setMarry((int) (Math.random() * 2) + 1 == 1);
             poiInvokeTestList.add(poiTest);
         }
         poiEntity.setDataList(poiInvokeTestList);

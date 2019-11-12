@@ -18,6 +18,9 @@ public class PoiInvokeTest {
 
     private String remark;
 
+    @PoiTableHeader(value = "已婚", index = 2)
+    private boolean marry;
+
     public String getIndex() {
         return index;
     }
@@ -56,5 +59,13 @@ public class PoiInvokeTest {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public boolean isMarry() {
+        return marry;
+    }
+
+    public void setMarry(boolean marry) {
+        this.marry = marry;
     }
 }
