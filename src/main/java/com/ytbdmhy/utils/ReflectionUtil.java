@@ -1,9 +1,7 @@
 package com.ytbdmhy.utils;
 
-import com.ytbdmhy.pojo.InvokeTest;
 import org.springframework.util.StringUtils;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -42,16 +40,16 @@ public class ReflectionUtil {
 
     /**
      * 根据类、方法名、参数的数量和类型获取方法
-     * @param clazz
-     * @param name
-     * @param args
+     * @param clazz 类
+     * @param methodName 方法名
+     * @param args 参数
      * @return
      */
-    public static Method getMethod(Class<?> clazz, String name, Object[] args) {
+    public static Method getMethod(Class<?> clazz, String methodName, Object[] args) {
         Method queryMethod = null;
         Method[] methods = clazz.getMethods();
         for(Method method : methods) {
-            if(method.getName().equals(name)) {
+            if(method.getName().equals(methodName)) {
                 Class<?>[] parameterTypes = method.getParameterTypes();
                 if(parameterTypes.length == (args == null ? 0 : args.length)) {
                     boolean isSameMethod = true;
@@ -69,6 +67,12 @@ public class ReflectionUtil {
         return queryMethod;
     }
 
+    /**
+     * 根据属性名获取属性值
+     * @param object object
+     * @param fieldName 属性名
+     * @return 属性值
+     */
     public static Object getFieldValue(Object object, String fieldName) {
         if (object == null || StringUtils.isEmpty(fieldName))
             return null;
@@ -80,25 +84,5 @@ public class ReflectionUtil {
             e.printStackTrace();
         }
         return null;
-    }
-
-    public static void test(Object object) {
-        Class<?> clazz = object.getClass();
-        Annotation[] annotations = clazz.getAnnotations();
-        Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields) {
-            System.out.println(field.getName());
-            Annotation[] fieldAnnotations = field.getAnnotations();
-            System.out.println();
-        }
-        System.out.println("over");
-    }
-
-    public static void main(String[] args) {
-        InvokeTest invokeTest = new InvokeTest();
-        invokeTest.setAddress("test address");
-        invokeTest.setAge(20);
-        invokeTest.setName("test name");
-        test(invokeTest);
     }
 }
