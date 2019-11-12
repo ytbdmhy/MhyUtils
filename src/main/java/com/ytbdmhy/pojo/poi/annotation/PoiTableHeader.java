@@ -10,5 +10,5 @@ public @interface PoiTableHeader {
 
     int index() default 0;
 
-    int width() default 10;
+    int width() default 5;
 }

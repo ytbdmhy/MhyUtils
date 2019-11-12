@@ -67,7 +67,7 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
             i = 0;
             for (POIHeaderIndex headerIndex : tempHeaders) {
                 sortFields[i] = headerIndex.getField();
-                firstRow.put(headerIndex.getHeader().value(), headerIndex.getHeader().width() * 264);
+                firstRow.put(getHeaderValue(headerIndex.getHeader().value(), i), getHeaderWidth(headerIndex.getHeader().width()));
                 ++i;
             }
         }
@@ -88,6 +88,19 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
         } else {
             POIUtilMhy.formatExportExcel(poiEntity.getResponse(), poiEntity.getTitle(), firstRow , excelData, poiEntity.isNeedMergeTitle());
         }
+    }
+
+    private static String getHeaderValue(String value, int i) {
+        return StringUtils.isEmpty(value) ? "列" + i : value;
+    }
+
+    private static int getHeaderWidth(int headerWidth) {
+        if (headerWidth < 5) {
+            headerWidth = 5;
+        } else if (headerWidth > 120) {
+            headerWidth = 120;
+        }
+        return (int) (headerWidth * 256.02 + 163.19);
     }
 
     public static void main(String[] args) {

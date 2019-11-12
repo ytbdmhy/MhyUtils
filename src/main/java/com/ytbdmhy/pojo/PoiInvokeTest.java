@@ -7,13 +7,13 @@ public class PoiInvokeTest {
     @PoiTableHeader(value = "序号", index = 1, width = 5)
     private String index;
 
-    @PoiTableHeader(value = "生日", index = 4, width = 20)
+    @PoiTableHeader(value = "生日", index = 4, width = 150)
     private String birthday;
 
-    @PoiTableHeader(value = "年龄", index = 3, width = 10)
+    @PoiTableHeader(value = "年龄", index = 3, width = 1)
     private String age;
 
-    @PoiTableHeader(value = "姓名", index = 2, width = 25)
+    @PoiTableHeader(value = "姓名", index = 2, width = 120)
     private String name;
 
     private String remark;
