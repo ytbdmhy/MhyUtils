@@ -119,7 +119,7 @@ public class POIInvokeUtilMhy extends POIUtilMhy {
         poiEntity.setTitle("poiInvokeTest");
         poiEntity.setNeedMergeTitle(true);
         long start = System.currentTimeMillis();
-        invokeExport(poiEntity);
+        poiEntity.export();
         System.out.println("1耗时:" + (System.currentTimeMillis() - start));
         // 导出350W条3列小字符串
         // ArrayList 耗时 27.321秒

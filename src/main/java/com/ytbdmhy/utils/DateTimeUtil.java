@@ -6,7 +6,7 @@ import java.util.Date;
 
 public class DateTimeUtil {
 
-    public static String getTodayYear() {
+    public static String getYearOfToday() {
         return getDateYear(new Date());
     }
 
@@ -31,14 +31,16 @@ public class DateTimeUtil {
         return dateFormat.format(calendar.getTime());
     }
 
-    public static void aaa() {
+    public static Date getYesterdayDate() {
         // 昨天的时间的Date
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, -24);
-        Date yesterdayDate = calendar.getTime();
+        return calendar.getTime();
     }
 
     public static void main(String[] args) {
-        System.out.println(getTodayYear());
+        System.out.println(getYearOfToday());
+        Date yesterday = getYesterdayDate();
+        System.out.println();
     }
 }
