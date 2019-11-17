@@ -1,7 +1,7 @@
 package com.ytbdmhy.pojo;
 
 import com.ytbdmhy.pojo.annotation.AnnotationTest;
-import com.ytbdmhy.pojo.poi.annotation.PoiTableHeader;
+import com.ytbdmhy.utils.poi.annotation.PoiTableHeader;
 import lombok.Getter;
 import lombok.Setter;
 

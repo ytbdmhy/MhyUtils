@@ -1,9 +1,9 @@
 package com.ytbdmhy.utils.poi;
 
 import com.ytbdmhy.pojo.PoiInvokeTest;
-import com.ytbdmhy.pojo.poi.POIEntity;
-import com.ytbdmhy.pojo.poi.POIHeaderIndex;
-import com.ytbdmhy.pojo.poi.annotation.PoiTableHeader;
+import com.ytbdmhy.utils.poi.pojo.POIEntity;
+import com.ytbdmhy.utils.poi.pojo.POIHeaderIndex;
+import com.ytbdmhy.utils.poi.annotation.PoiTableHeader;
 import com.ytbdmhy.utils.ReflectionUtil;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
