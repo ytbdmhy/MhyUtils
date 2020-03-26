@@ -214,8 +214,8 @@ public class POIUtilMhy {
         if (file == null)
 //            throw new NullPointerException("excel不存在");
             return null;
-        String fileName = file.getName();
-        if (!fileName.toLowerCase().endsWith(".xls") && !fileName.toLowerCase().endsWith(".xlsx"))
+        String fileName = file.getName().toLowerCase();
+        if (!fileName.endsWith(".xls") && !fileName.endsWith(".xlsx"))
 //            throw new NullPointerException("读取的文件不是excel");
             return null;
         Workbook workbook = null;
